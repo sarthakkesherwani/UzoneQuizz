@@ -1,0 +1,34 @@
+{
+  "id": "lc-medium-longest-unique-substring",
+  "title": "Longest Substring Without Repeating Characters",
+  "difficulty": "Medium",
+  "tags": ["Hash Table", "String", "Sliding Window"],
+  "description": "Given a string s, find the length of the longest substring without duplicate characters.\n\nA substring is a contiguous sequence of characters within the string. Return the length of the longest such substring in which no character appears more than once.",
+  "examples": [
+    { "input": "s = \"abcabcbb\"", "output": "3", "explanation": "The answer is \"abc\", with the length of 3." },
+    { "input": "s = \"bbbbb\"", "output": "1", "explanation": "The answer is \"b\", with the length of 1." },
+    { "input": "s = \"pwwkew\"", "output": "3", "explanation": "The answer is \"wke\", with the length of 3. Notice that the answer must be a substring; \"pwke\" is a subsequence and not a substring." }
+  ],
+  "constraints": [
+    "0 <= s.length <= 5 * 10^4",
+    "s consists of English letters, digits, symbols and spaces."
+  ],
+  "functionName": "lengthOfLongestSubstring",
+  "params": ["s"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar lengthOfLongestSubstring = function(s) {\n    \n};",
+    "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var lengthOfLongestSubstring = function(s) {\n    const lastSeen = new Map();\n    let left = 0;\n    let best = 0;\n    for (let right = 0; right < s.length; right++) {\n        const char = s[right];\n        if (lastSeen.has(char)) {\n            left = Math.max(left, lastSeen.get(char) + 1);\n        }\n        lastSeen.set(char, right);\n        best = Math.max(best, right - left + 1);\n    }\n    return best;\n};",
+    "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        last_seen = {}\n        left = 0\n        best = 0\n\n        for right, char in enumerate(s):\n            if char in last_seen:\n                left = max(left, last_seen[char] + 1)\n            last_seen[char] = right\n            best = max(best, right - left + 1)\n\n        return best"
+  },
+  "approach": "Maintain the left boundary of a duplicate-free window and a map from each character to its most recent index. On seeing character c at index right, move left to max(left, last[c] + 1); the max prevents the boundary from moving backward. Update the best window length and c's latest position. Each character is processed once. Time complexity is O(n). Space complexity is O(min(n, a)), where a is the character-set size (often treated as O(a)).",
+  "complexity": { "time": "O(n)", "space": "O(min(n, a))" },
+  "tests": [
+    { "args": ["abcabcbb"], "expected": 3 },
+    { "args": [""], "expected": 0 },
+    { "args": ["abba"], "expected": 2 }
+  ]
+}

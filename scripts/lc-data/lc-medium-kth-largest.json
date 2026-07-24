@@ -1,0 +1,33 @@
+{
+  "id": "lc-medium-kth-largest",
+  "title": "Kth Largest Element in an Array",
+  "difficulty": "Medium",
+  "tags": ["Array", "Divide and Conquer", "Sorting", "Heap (Priority Queue)", "Quickselect"],
+  "description": "Given an integer array nums and an integer k, return the kth largest element in the array.\n\nNote that it is the kth largest element in the sorted order, not the kth distinct element.\n\nCan you solve it without sorting?",
+  "examples": [
+    { "input": "nums = [3,2,1,5,6,4], k = 2", "output": "5" },
+    { "input": "nums = [3,2,3,1,2,4,5,5,6], k = 4", "output": "4" }
+  ],
+  "constraints": [
+    "1 <= k <= nums.length <= 10^5",
+    "-10^4 <= nums[i] <= 10^4"
+  ],
+  "functionName": "findKthLargest",
+  "params": ["nums", "k"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number}\n */\nvar findKthLargest = function(nums, k) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def findKthLargest(self, nums: List[int], k: int) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var findKthLargest = function(nums, k) {\n    const target = nums.length - k;\n    let left = 0, right = nums.length - 1;\n    while (left <= right) {\n        const pivotIdx = left + Math.floor(Math.random() * (right - left + 1));\n        const pivot = nums[pivotIdx];\n        let less = left, current = left, greater = right;\n        while (current <= greater) {\n            if (nums[current] < pivot) {\n                [nums[less], nums[current]] = [nums[current], nums[less]];\n                less++; current++;\n            } else if (nums[current] > pivot) {\n                [nums[current], nums[greater]] = [nums[greater], nums[current]];\n                greater--;\n            } else {\n                current++;\n            }\n        }\n        if (target < less) right = less - 1;\n        else if (target > greater) left = greater + 1;\n        else return nums[target];\n    }\n};",
+    "python": "import random\nfrom typing import List\n\n\nclass Solution:\n    def findKthLargest(self, nums: List[int], k: int) -> int:\n        target = len(nums) - k\n        left, right = 0, len(nums) - 1\n\n        while left <= right:\n            pivot = nums[random.randint(left, right)]\n            less = left\n            current = left\n            greater = right\n\n            while current <= greater:\n                if nums[current] < pivot:\n                    nums[less], nums[current] = nums[current], nums[less]\n                    less += 1\n                    current += 1\n                elif nums[current] > pivot:\n                    nums[current], nums[greater] = nums[greater], nums[current]\n                    greater -= 1\n                else:\n                    current += 1\n\n            if target < less:\n                right = less - 1\n            elif target > greater:\n                left = greater + 1\n            else:\n                return nums[target]\n\n        raise ValueError(\"k is outside the valid range\")\n"
+  },
+  "approach": "The kth largest value occupies index n - k in ascending order. Randomized Quickselect partitions values around a pivot and continues only in the region containing that index; a three-way partition efficiently groups duplicates. Expected time complexity is O(n), while the adversarial worst case is O(n^2). Space complexity is O(1) because the partition is iterative and in place. (Randomization makes consistently unbalanced partitions unlikely.)",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": [[3, 2, 1, 5, 6, 4], 2], "expected": 5 },
+    { "args": [[1], 1], "expected": 1 },
+    { "args": [[3, 2, 3, 1, 2, 4, 5, 5, 6], 4], "expected": 4 }
+  ]
+}

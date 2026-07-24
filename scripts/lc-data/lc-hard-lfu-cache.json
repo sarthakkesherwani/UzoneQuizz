@@ -1,0 +1,56 @@
+{
+  "id": "lc-hard-lfu-cache",
+  "title": "LFU Cache",
+  "difficulty": "Hard",
+  "tags": ["Hash Table", "Linked List", "Design", "Doubly-Linked List", "Ordered Map"],
+  "description": "Design and implement a data structure for a Least Frequently Used (LFU) cache.\n\nImplement the LFUCache class:\n\nLFUCache(int capacity) initializes the object with the capacity of the data structure.\n\nint get(int key) gets the value of the key if the key exists in the cache. Otherwise, returns -1.\n\nvoid put(int key, int value) updates the value of the key if present, or inserts the key if not already present. When the cache reaches its capacity, it should invalidate and remove the least frequently used key before inserting a new item. For this problem, when there is a tie (i.e., two or more keys with the same frequency), the least recently used key would be invalidated.\n\nTo determine the least frequently used key, a use counter is maintained for each key in the cache. The key with the smallest use counter is the least frequently used key.\n\nWhen a key is first inserted into the cache, its use counter is set to 1 (due to the put operation). The use counter for a key in the cache is incremented either a get or put operation is called on it.\n\nBoth get and put must run in average O(1) time complexity.",
+  "examples": [
+    {
+      "input": "[\"LFUCache\",\"put\",\"put\",\"get\",\"put\",\"get\",\"get\",\"put\",\"get\",\"get\",\"get\"]\n[[2],[1,1],[2,2],[1],[3,3],[2],[3],[4,4],[1],[3],[4]]",
+      "output": "[null,null,null,1,null,-1,3,null,-1,3,4]",
+      "explanation": "With capacity 2: put(1,1) and put(2,2) fill the cache. get(1) returns 1 and raises key 1's frequency. put(3,3) evicts key 2 (frequency 1, the least frequently used), so get(2) returns -1. get(3) returns 3. put(4,4) evicts key 1 (both keys now share the lowest frequency, and key 1 is least recently used), so get(1) returns -1, get(3) returns 3, get(4) returns 4."
+    }
+  ],
+  "constraints": [
+    "1 <= capacity <= 10^4",
+    "0 <= key <= 10^5",
+    "0 <= value <= 10^9",
+    "At most 2 * 10^5 calls will be made to get and put."
+  ],
+  "functionName": "LFUCache",
+  "params": [],
+  "judge": "design",
+  "starter": {
+    "javascript": "/**\n * @param {number} capacity\n */\nvar LFUCache = function(capacity) {\n    \n};\n\n/**\n * @param {number} key\n * @return {number}\n */\nLFUCache.prototype.get = function(key) {\n    \n};\n\n/**\n * @param {number} key\n * @param {number} value\n * @return {void}\n */\nLFUCache.prototype.put = function(key, value) {\n    \n};",
+    "python": "class LFUCache:\n    def __init__(self, capacity: int):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass"
+  },
+  "solution": {
+    "javascript": "class LFUCache {\n    constructor(capacity) {\n        this.capacity = capacity;\n        this.data = new Map();      // key -> [value, frequency]\n        this.groups = new Map();    // frequency -> Map(key -> null), insertion-ordered\n        this.minFrequency = 0;\n    }\n\n    _promote(key) {\n        const [value, frequency] = this.data.get(key);\n        const bucket = this.groups.get(frequency);\n        bucket.delete(key);\n        if (bucket.size === 0) {\n            this.groups.delete(frequency);\n            if (this.minFrequency === frequency) this.minFrequency += 1;\n        }\n        const newFrequency = frequency + 1;\n        this.data.set(key, [value, newFrequency]);\n        if (!this.groups.has(newFrequency)) this.groups.set(newFrequency, new Map());\n        this.groups.get(newFrequency).set(key, null);\n    }\n\n    get(key) {\n        if (!this.data.has(key)) return -1;\n        const value = this.data.get(key)[0];\n        this._promote(key);\n        return value;\n    }\n\n    put(key, value) {\n        if (this.capacity === 0) return;\n        if (this.data.has(key)) {\n            const frequency = this.data.get(key)[1];\n            this.data.set(key, [value, frequency]);\n            this._promote(key);\n            return;\n        }\n        if (this.data.size === this.capacity) {\n            const bucket = this.groups.get(this.minFrequency);\n            const evictedKey = bucket.keys().next().value;\n            bucket.delete(evictedKey);\n            if (bucket.size === 0) this.groups.delete(this.minFrequency);\n            this.data.delete(evictedKey);\n        }\n        this.data.set(key, [value, 1]);\n        if (!this.groups.has(1)) this.groups.set(1, new Map());\n        this.groups.get(1).set(key, null);\n        this.minFrequency = 1;\n    }\n}",
+    "python": "from collections import OrderedDict, defaultdict\n\nclass LFUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.data = {}  # key -> (value, frequency)\n        self.groups = defaultdict(OrderedDict)  # frequency -> ordered keys\n        self.min_frequency = 0\n\n    def _promote(self, key: int) -> None:\n        value, frequency = self.data[key]\n        del self.groups[frequency][key]\n        if not self.groups[frequency]:\n            del self.groups[frequency]\n            if self.min_frequency == frequency:\n                self.min_frequency += 1\n\n        new_frequency = frequency + 1\n        self.data[key] = (value, new_frequency)\n        self.groups[new_frequency][key] = None\n\n    def get(self, key: int) -> int:\n        if key not in self.data:\n            return -1\n        value = self.data[key][0]\n        self._promote(key)\n        return value\n\n    def put(self, key: int, value: int) -> None:\n        if self.capacity == 0:\n            return\n\n        if key in self.data:\n            frequency = self.data[key][1]\n            self.data[key] = (value, frequency)\n            self._promote(key)\n            return\n\n        if len(self.data) == self.capacity:\n            evicted_key, _ = self.groups[self.min_frequency].popitem(last=False)\n            if not self.groups[self.min_frequency]:\n                del self.groups[self.min_frequency]\n            del self.data[evicted_key]\n\n        self.data[key] = (value, 1)\n        self.groups[1][key] = None\n        self.min_frequency = 1"
+  },
+  "approach": "Keep a key map for direct value and frequency lookup, plus one ordered bucket per frequency whose iteration order captures recency among keys sharing that count. A get or updating put moves the key from its current frequency bucket to the next one; if the emptied bucket was the minimum, the minimum frequency advances by one. Track min_frequency so eviction never scans: on an insertion at capacity, drop the oldest key in the minimum-frequency bucket (least frequent, and among ties least recent). A new key enters with frequency 1 and resets min_frequency to 1. Hash-map and ordered-bucket edits are all constant time, so each operation is average O(1).",
+  "complexity": { "time": "O(1) average per operation", "space": "O(capacity)" },
+  "tests": [
+    {
+      "args": [
+        ["LFUCache", "put", "put", "get", "put", "get", "get", "put", "get", "get", "get"],
+        [[2], [1, 1], [2, 2], [1], [3, 3], [2], [3], [4, 4], [1], [3], [4]]
+      ],
+      "expected": [null, null, null, 1, null, -1, 3, null, -1, 3, 4]
+    },
+    {
+      "args": [
+        ["LFUCache", "put", "get"],
+        [[0], [0, 0], [0]]
+      ],
+      "expected": [null, null, -1]
+    },
+    {
+      "args": [
+        ["LFUCache", "put", "put", "get", "get", "put", "get", "get", "get"],
+        [[2], [1, 1], [2, 2], [1], [2], [3, 3], [1], [2], [3]]
+      ],
+      "expected": [null, null, null, 1, 2, null, -1, 2, 3]
+    }
+  ]
+}

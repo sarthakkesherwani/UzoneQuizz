@@ -1,0 +1,19 @@
+# Render blueprint — deploy UzoneQuiz as a web service.
+# In the Render dashboard: New → Blueprint → point at this repo, then set
+# MONGODB_URI to your MongoDB Atlas connection string (mongodb+srv://...).
+services:
+  - type: web
+    name: uzonequiz
+    runtime: node
+    plan: free
+    buildCommand: ""            # zero npm dependencies — nothing to install
+    startCommand: node server/index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: MONGODB_URI
+        sync: false             # paste your Atlas URI in the dashboard (kept secret)
+      - key: JWT_SECRET
+        generateValue: true     # Render generates a strong random value
+      - key: MONGO_CONNECT_ATTEMPTS
+        value: "60"

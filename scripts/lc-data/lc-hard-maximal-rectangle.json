@@ -1,0 +1,57 @@
+{
+  "id": "lc-hard-maximal-rectangle",
+  "title": "Maximal Rectangle",
+  "difficulty": "Hard",
+  "tags": ["Array", "Dynamic Programming", "Stack", "Matrix", "Monotonic Stack"],
+  "description": "Given a rows x cols binary matrix filled with '0's and '1's, find the largest rectangle containing only '1's and return its area.\n\nThe rectangle must be axis-aligned and consist entirely of '1' cells. If the matrix has no '1' cells, the area is 0.",
+  "examples": [
+    {
+      "input": "matrix = [[\"1\",\"0\",\"1\",\"0\",\"0\"],[\"1\",\"0\",\"1\",\"1\",\"1\"],[\"1\",\"1\",\"1\",\"1\",\"1\"],[\"1\",\"0\",\"0\",\"1\",\"0\"]]",
+      "output": "6",
+      "explanation": "The maximal rectangle of 1's has area 6, spanning the bottom-middle block of the matrix."
+    },
+    {
+      "input": "matrix = [[\"0\"]]",
+      "output": "0",
+      "explanation": "There are no 1 cells, so the largest rectangle has area 0."
+    },
+    {
+      "input": "matrix = [[\"1\"]]",
+      "output": "1",
+      "explanation": "A single 1 cell forms a rectangle of area 1."
+    }
+  ],
+  "constraints": [
+    "rows == matrix.length",
+    "cols == matrix[i].length",
+    "1 <= rows, cols <= 200",
+    "matrix[i][j] is '0' or '1'."
+  ],
+  "functionName": "maximalRectangle",
+  "params": ["matrix"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {character[][]} matrix\n * @return {number}\n */\nvar maximalRectangle = function(matrix) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def maximalRectangle(self, matrix: List[List[str]]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var maximalRectangle = function(matrix) {\n    if (!matrix || !matrix.length || !matrix[0].length) return 0;\n    const cols = matrix[0].length;\n    const heights = new Array(cols).fill(0);\n    let answer = 0;\n    for (const row of matrix) {\n        for (let col = 0; col < cols; col++) {\n            heights[col] = row[col] === '1' ? heights[col] + 1 : 0;\n        }\n        const stack = [];\n        const extended = heights.concat([0]);\n        for (let index = 0; index < extended.length; index++) {\n            const height = extended[index];\n            let start = index;\n            while (stack.length && stack[stack.length - 1][1] > height) {\n                const [popStart, oldHeight] = stack.pop();\n                start = popStart;\n                answer = Math.max(answer, oldHeight * (index - popStart));\n            }\n            stack.push([start, height]);\n        }\n    }\n    return answer;\n};",
+    "python": "from typing import List\n\n\nclass Solution:\n    def maximalRectangle(self, matrix: List[List[str]]) -> int:\n        if not matrix or not matrix[0]:\n            return 0\n\n        columns = len(matrix[0])\n        heights = [0] * columns\n        answer = 0\n\n        for row in matrix:\n            for col, value in enumerate(row):\n                heights[col] = heights[col] + 1 if value == '1' else 0\n\n            stack = []\n            for index, height in enumerate(heights + [0]):\n                start = index\n                while stack and stack[-1][1] > height:\n                    start, old_height = stack.pop()\n                    answer = max(answer, old_height * (index - start))\n                stack.append((start, height))\n\n        return answer"
+  },
+  "approach": "Process the matrix row by row, maintaining a histogram where heights[c] is the number of consecutive '1' cells ending at the current row in column c; a '0' resets that column to 0. The largest all-ones rectangle whose bottom edge lies on the current row is exactly the largest rectangle in this histogram. Compute that with a monotonic increasing stack of (startIndex, height): when a shorter bar appears, pop taller bars and measure the area each spans, carrying the popped start index leftward. Appending a sentinel height of 0 flushes the stack at the end of each row. For R rows and C columns the work is O(R * C).",
+  "complexity": { "time": "O(rows * cols)", "space": "O(cols)" },
+  "tests": [
+    {
+      "args": [[["1", "0", "1", "0", "0"], ["1", "0", "1", "1", "1"], ["1", "1", "1", "1", "1"], ["1", "0", "0", "1", "0"]]],
+      "expected": 6
+    },
+    {
+      "args": [[["0", "1"], ["1", "0"]]],
+      "expected": 1
+    },
+    {
+      "args": [[["1", "1", "1"], ["1", "1", "1"]]],
+      "expected": 6
+    }
+  ]
+}

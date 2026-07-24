@@ -1,0 +1,34 @@
+{
+  "id": "lc-hard-count-smaller-after-self",
+  "title": "Count of Smaller Numbers After Self",
+  "difficulty": "Hard",
+  "tags": ["Array", "Binary Indexed Tree", "Divide and Conquer", "Merge Sort"],
+  "description": "You are given an integer array nums. For each element, count how many elements to its right are strictly smaller than it.\n\nReturn an integer array counts where counts[i] is the number of positions j > i such that nums[j] < nums[i]. The counts must be returned in the original order of nums.\n\nA naive quadratic scan works but is too slow for large inputs; an efficient solution answers prefix-frequency queries while scanning from right to left.",
+  "examples": [
+    { "input": "nums = [5,2,6,1]", "output": "[2,1,1,0]", "explanation": "To the right of 5 there are two smaller elements (2 and 1). To the right of 2 there is one smaller element (1). To the right of 6 there is one smaller element (1). To the right of 1 there are no smaller elements." },
+    { "input": "nums = [-1]", "output": "[0]", "explanation": "A single element has nothing to its right." },
+    { "input": "nums = [-1,-1]", "output": "[0,0]", "explanation": "Neither element is strictly greater than the element to its right." }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^4 <= nums[i] <= 10^4"
+  ],
+  "functionName": "countSmaller",
+  "params": ["nums"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number[]}\n */\nvar countSmaller = function(nums) {\n    \n};",
+    "python": "class Solution:\n    def countSmaller(self, nums: List[int]) -> List[int]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var countSmaller = function(nums) {\n    const ordered = Array.from(new Set(nums)).sort((a, b) => a - b);\n    const rank = new Map();\n    ordered.forEach((value, index) => rank.set(value, index + 1));\n    const tree = new Array(ordered.length + 1).fill(0);\n\n    const add = (index) => {\n        while (index < tree.length) {\n            tree[index] += 1;\n            index += index & -index;\n        }\n    };\n\n    const prefixSum = (index) => {\n        let total = 0;\n        while (index > 0) {\n            total += tree[index];\n            index -= index & -index;\n        }\n        return total;\n    };\n\n    const answer = [];\n    for (let i = nums.length - 1; i >= 0; i--) {\n        const index = rank.get(nums[i]);\n        answer.push(prefixSum(index - 1));\n        add(index);\n    }\n\n    answer.reverse();\n    return answer;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def countSmaller(self, nums: List[int]) -> List[int]:\n        ordered = sorted(set(nums))\n        rank = {value: index + 1 for index, value in enumerate(ordered)}\n        tree = [0] * (len(ordered) + 1)\n\n        def add(index: int) -> None:\n            while index < len(tree):\n                tree[index] += 1\n                index += index & -index\n\n        def prefix_sum(index: int) -> int:\n            total = 0\n            while index > 0:\n                total += tree[index]\n                index -= index & -index\n            return total\n\n        answer = []\n        for value in reversed(nums):\n            index = rank[value]\n            answer.append(prefix_sum(index - 1))\n            add(index)\n\n        answer.reverse()\n        return answer\n"
+  },
+  "approach": "Coordinate-compress the values into dense ranks so arbitrary integers map to contiguous positions without changing comparisons. Scan the array from right to left maintaining a Fenwick (binary indexed) tree over ranks that records which values have already been seen (all of which lie to the right of the current index). For each element, a prefix-sum query up to its rank minus one counts already-seen values that are strictly smaller, which becomes its answer; then insert the current rank. Reversing the collected answers restores original order. With n elements, compression and n tree operations run in O(n log n) time and O(n) space.",
+  "complexity": { "time": "O(n log n)", "space": "O(n)" },
+  "tests": [
+    { "args": [[5, 2, 6, 1]], "expected": [2, 1, 1, 0] },
+    { "args": [[-1, -1]], "expected": [0, 0] },
+    { "args": [[10, 9, 8, 7, 6, 5]], "expected": [5, 4, 3, 2, 1, 0] }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "lc-easy-valid-parentheses",
+  "title": "Valid Parentheses",
+  "difficulty": "Easy",
+  "tags": ["String", "Stack"],
+  "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.\n\nAn input string is valid if:\n\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
+  "examples": [
+    { "input": "s = \"()\"", "output": "true" },
+    { "input": "s = \"()[]{}\"", "output": "true" },
+    { "input": "s = \"(]\"", "output": "false", "explanation": "The '(' is closed by ']', which is the wrong bracket type." },
+    { "input": "s = \"([)]\"", "output": "false", "explanation": "The brackets are not closed in the correct order." }
+  ],
+  "constraints": [
+    "1 <= s.length <= 10^4",
+    "s consists of parentheses only '()[]{}'."
+  ],
+  "functionName": "isValid",
+  "params": ["s"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @return {boolean}\n */\nvar isValid = function(s) {\n    \n};",
+    "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var isValid = function(s) {\n    const openingFor = { ')': '(', ']': '[', '}': '{' };\n    const stack = [];\n    for (const char of s) {\n        if (char in openingFor) {\n            if (stack.length === 0 || stack.pop() !== openingFor[char]) return false;\n        } else {\n            stack.push(char);\n        }\n    }\n    return stack.length === 0;\n};",
+    "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        opening_for = {')': '(', ']': '[', '}': '{'}\n        stack = []\n\n        for char in s:\n            if char in opening_for:\n                if not stack or stack.pop() != opening_for[char]:\n                    return False\n            else:\n                stack.append(char)\n\n        return not stack"
+  },
+  "approach": "A stack preserves the order in which openings must be closed. Push every opening bracket. For a closing bracket, the stack must be nonempty and its top must be the corresponding opening bracket; otherwise the string is invalid. The stack must be empty after the scan. Every character is pushed or popped at most once, so time is O(n). In the all-opening worst case, the stack uses O(n) auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(n)" },
+  "tests": [
+    { "args": ["()[]{}"], "expected": true },
+    { "args": ["("], "expected": false },
+    { "args": ["([)]"], "expected": false }
+  ]
+}

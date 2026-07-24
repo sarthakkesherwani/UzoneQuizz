@@ -1,0 +1,34 @@
+{
+  "id": "lc-medium-longest-increasing-subseq",
+  "title": "Longest Increasing Subsequence",
+  "difficulty": "Medium",
+  "tags": ["Array", "Binary Search", "Dynamic Programming"],
+  "description": "Given an integer array nums, return the length of the longest strictly increasing subsequence.\n\nA subsequence is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements. For example, [3,6,2,7] is a subsequence of the array [0,3,1,6,2,2,7].",
+  "examples": [
+    { "input": "nums = [10,9,2,5,3,7,101,18]", "output": "4", "explanation": "The longest increasing subsequence is [2,3,7,101], therefore the length is 4." },
+    { "input": "nums = [0,1,0,3,2,3]", "output": "4", "explanation": "The longest increasing subsequence is [0,1,2,3]." },
+    { "input": "nums = [7,7,7,7,7,7,7]", "output": "1", "explanation": "The subsequence must be strictly increasing, so equal values cannot extend it." }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 2500",
+    "-10^4 <= nums[i] <= 10^4"
+  ],
+  "functionName": "lengthOfLIS",
+  "params": ["nums"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar lengthOfLIS = function(nums) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def lengthOfLIS(self, nums: List[int]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var lengthOfLIS = function(nums) {\n    const tails = [];\n    for (const value of nums) {\n        let lo = 0, hi = tails.length;\n        while (lo < hi) {\n            const mid = (lo + hi) >> 1;\n            if (tails[mid] < value) lo = mid + 1;\n            else hi = mid;\n        }\n        if (lo === tails.length) tails.push(value);\n        else tails[lo] = value;\n    }\n    return tails.length;\n};",
+    "python": "from bisect import bisect_left\nfrom typing import List\n\n\nclass Solution:\n    def lengthOfLIS(self, nums: List[int]) -> int:\n        tails = []\n\n        for value in nums:\n            index = bisect_left(tails, value)\n            if index == len(tails):\n                tails.append(value)\n            else:\n                tails[index] = value\n\n        return len(tails)\n"
+  },
+  "approach": "Maintain tails[i] as the smallest ending value found for an increasing subsequence of length i + 1. For each number, use lower_bound (bisect_left) to replace the first tail greater than or equal to it, or append if none exists. Replacements preserve achievable lengths while making future extension easiest; lower_bound enforces strict increase. Time complexity is O(n log n), and space complexity is O(n).",
+  "complexity": { "time": "O(n log n)", "space": "O(n)" },
+  "tests": [
+    { "args": [[10, 9, 2, 5, 3, 7, 101, 18]], "expected": 4 },
+    { "args": [[7, 7, 7, 7, 7, 7, 7]], "expected": 1 },
+    { "args": [[-2, -1, 0, -3, 4, -4, 5, 1, 2, 3, 6, -5, 7]], "expected": 8 }
+  ]
+}

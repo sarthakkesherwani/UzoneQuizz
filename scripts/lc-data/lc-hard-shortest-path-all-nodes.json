@@ -1,0 +1,38 @@
+{
+  "id": "lc-hard-shortest-path-all-nodes",
+  "title": "Shortest Path Visiting All Nodes",
+  "difficulty": "Hard",
+  "tags": ["Bit Manipulation", "Breadth-First Search", "Graph", "Dynamic Programming"],
+  "description": "You have an undirected, connected graph of n nodes labeled from 0 to n - 1. You are given an array graph where graph[i] is a list of all the nodes connected with node i by an edge.\n\nReturn the length of the shortest path that visits every node. You may start and stop at any node, you may revisit nodes multiple times, and you may reuse edges.",
+  "examples": [
+    { "input": "graph = [[1,2,3],[0],[0],[0]]", "output": "4", "explanation": "One possible path is [1,0,2,0,3]." },
+    { "input": "graph = [[1],[0,2,4],[1,3,4],[2],[1,2]]", "output": "4", "explanation": "One possible path is [0,1,4,2,3]." },
+    { "input": "graph = [[1],[0]]", "output": "1", "explanation": "Traversing the single edge between the two nodes visits both." }
+  ],
+  "constraints": [
+    "n == graph.length",
+    "1 <= n <= 12",
+    "0 <= graph[i].length < n",
+    "graph[i] does not contain i.",
+    "If graph[a] contains b, then graph[b] contains a.",
+    "The input graph is always connected."
+  ],
+  "functionName": "shortestPathLength",
+  "params": ["graph"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[][]} graph\n * @return {number}\n */\nvar shortestPathLength = function(graph) {\n    \n};",
+    "python": "class Solution:\n    def shortestPathLength(self, graph: List[List[int]]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var shortestPathLength = function(graph) {\n    const n = graph.length;\n    if (n <= 1) return 0;\n\n    const fullMask = (1 << n) - 1;\n    const queue = [];\n    const seen = new Set();\n    for (let node = 0; node < n; node++) {\n        queue.push([node, 1 << node, 0]);\n        seen.add(node * (1 << n) + (1 << node));\n    }\n\n    let head = 0;\n    while (head < queue.length) {\n        const [node, mask, distance] = queue[head++];\n        for (const neighbor of graph[node]) {\n            const nextMask = mask | (1 << neighbor);\n            if (nextMask === fullMask) return distance + 1;\n            const state = neighbor * (1 << n) + nextMask;\n            if (!seen.has(state)) {\n                seen.add(state);\n                queue.push([neighbor, nextMask, distance + 1]);\n            }\n        }\n    }\n\n    return -1;\n};",
+    "python": "from collections import deque\nfrom typing import List\n\nclass Solution:\n    def shortestPathLength(self, graph: List[List[int]]) -> int:\n        n = len(graph)\n        if n <= 1:\n            return 0\n\n        full_mask = (1 << n) - 1\n        queue = deque((node, 1 << node, 0) for node in range(n))\n        seen = {(node, 1 << node) for node in range(n)}\n\n        while queue:\n            node, mask, distance = queue.popleft()\n            for neighbor in graph[node]:\n                next_mask = mask | (1 << neighbor)\n                if next_mask == full_mask:\n                    return distance + 1\n                state = (neighbor, next_mask)\n                if state not in seen:\n                    seen.add(state)\n                    queue.append((neighbor, next_mask, distance + 1))\n\n        return -1"
+  },
+  "approach": "Because nodes and edges may be revisited, the search state must capture which nodes are still outstanding. Encode the visited set as a bitmask and pair it with the current node, giving n*2^n states. Seed a BFS with every node as a start point (mask 1<<node, distance 0), then expand each state to its neighbors, OR-ing the neighbor into the mask. Since each edge costs one step, the first time BFS reaches any state with a full mask that distance is optimal. Time is O((n+E)*2^n) and space is O(n*2^n).",
+  "complexity": { "time": "O((n+E)*2^n)", "space": "O(n*2^n)" },
+  "tests": [
+    { "args": [[[1,2,3],[0],[0],[0]]], "expected": 4 },
+    { "args": [[[1],[0,2,4],[1,3,4],[2],[1,2]]], "expected": 4 },
+    { "args": [[[1],[0]]], "expected": 1 }
+  ]
+}

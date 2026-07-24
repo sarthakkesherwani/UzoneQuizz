@@ -1,0 +1,34 @@
+{
+  "id": "lc-hard-trapping-rain-water",
+  "title": "Trapping Rain Water",
+  "difficulty": "Hard",
+  "tags": ["Array", "Two Pointers", "Dynamic Programming", "Stack"],
+  "description": "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.\n\nWater can only be trapped in the gaps between bars, and the amount held above any position is bounded by the shorter of the tallest bars to its left and right. Return the total volume of trapped water in unit squares.",
+  "examples": [
+    { "input": "height = [0,1,0,2,1,0,1,3,2,1,2,1]", "output": "6", "explanation": "The elevation map traps 6 units of rain water between the bars." },
+    { "input": "height = [4,2,0,3,2,5]", "output": "9", "explanation": "The dips before the tall bars fill with a total of 9 units of water." }
+  ],
+  "constraints": [
+    "n == height.length",
+    "1 <= n <= 2 * 10^4",
+    "0 <= height[i] <= 10^5"
+  ],
+  "functionName": "trap",
+  "params": ["height"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} height\n * @return {number}\n */\nvar trap = function(height) {\n    \n};",
+    "python": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var trap = function(height) {\n    let left = 0, right = height.length - 1;\n    let leftMax = 0, rightMax = 0, water = 0;\n\n    while (left <= right) {\n        if (height[left] <= height[right]) {\n            leftMax = Math.max(leftMax, height[left]);\n            water += leftMax - height[left];\n            left++;\n        } else {\n            rightMax = Math.max(rightMax, height[right]);\n            water += rightMax - height[right];\n            right--;\n        }\n    }\n\n    return water;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def trap(self, height: List[int]) -> int:\n        left, right = 0, len(height) - 1\n        left_max = right_max = 0\n        water = 0\n\n        while left <= right:\n            if height[left] <= height[right]:\n                left_max = max(left_max, height[left])\n                water += left_max - height[left]\n                left += 1\n            else:\n                right_max = max(right_max, height[right])\n                water += right_max - height[right]\n                right -= 1\n\n        return water"
+  },
+  "approach": "Use two pointers converging from both ends while tracking the maximum bar seen from each side. The shorter of the two current boundaries limits how much water sits above the pointer on that side, so whenever the left height is no greater than the right height the left side is the binding constraint and its trapped water equals leftMax minus its own height; symmetrically for the right. Each index is processed exactly once, giving linear time with constant auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": [[0,1,0,2,1,0,1,3,2,1,2,1]], "expected": 6 },
+    { "args": [[4,2,0,3,2,5]], "expected": 9 },
+    { "args": [[5,4,1,2]], "expected": 1 }
+  ]
+}

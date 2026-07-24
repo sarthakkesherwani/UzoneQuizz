@@ -1,0 +1,34 @@
+{
+  "id": "lc-medium-merge-intervals",
+  "title": "Merge Intervals",
+  "difficulty": "Medium",
+  "tags": ["Array", "Sorting"],
+  "description": "Given an array of intervals where intervals[i] = [start_i, end_i], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.\n\nTwo intervals overlap if they share at least one point; intervals that merely touch, such as [1,4] and [4,5], are considered overlapping and must be merged.\n\nYou may return the merged intervals in any order.",
+  "examples": [
+    { "input": "intervals = [[1,3],[2,6],[8,10],[15,18]]", "output": "[[1,6],[8,10],[15,18]]", "explanation": "Intervals [1,3] and [2,6] overlap, so they are merged into [1,6]." },
+    { "input": "intervals = [[1,4],[4,5]]", "output": "[[1,5]]", "explanation": "Intervals [1,4] and [4,5] touch at 4 and are considered overlapping, so they merge into [1,5]." }
+  ],
+  "constraints": [
+    "1 <= intervals.length <= 10^4",
+    "intervals[i].length == 2",
+    "-10^4 <= start_i <= end_i <= 10^4"
+  ],
+  "functionName": "merge",
+  "params": ["intervals"],
+  "judge": "unordered",
+  "starter": {
+    "javascript": "/**\n * @param {number[][]} intervals\n * @return {number[][]}\n */\nvar merge = function(intervals) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def merge(self, intervals: List[List[int]]) -> List[List[int]]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var merge = function(intervals) {\n    if (intervals.length === 0) return [];\n    const ordered = intervals.slice().sort((a, b) => a[0] - b[0]);\n    const merged = [ordered[0].slice()];\n    for (let i = 1; i < ordered.length; i++) {\n        const [start, end] = ordered[i];\n        const last = merged[merged.length - 1];\n        if (start <= last[1]) {\n            last[1] = Math.max(last[1], end);\n        } else {\n            merged.push([start, end]);\n        }\n    }\n    return merged;\n};",
+    "python": "from typing import List\n\n\nclass Solution:\n    def merge(self, intervals: List[List[int]]) -> List[List[int]]:\n        if not intervals:\n            return []\n\n        ordered = sorted(intervals, key=lambda interval: interval[0])\n        merged = [ordered[0].copy()]\n\n        for start, end in ordered[1:]:\n            if start <= merged[-1][1]:\n                merged[-1][1] = max(merged[-1][1], end)\n            else:\n                merged.append([start, end])\n\n        return merged"
+  },
+  "approach": "Sorting by start makes all intervals that can extend a merged interval arrive consecutively. If the next start is no greater than the current merged end, update that end to the larger endpoint; otherwise append a new interval. Sorting dominates the time complexity at O(n log n), followed by an O(n) scan. Space is O(n) for the sorted copy and the returned list.",
+  "complexity": { "time": "O(n log n)", "space": "O(n)" },
+  "tests": [
+    { "args": [[[1, 3], [2, 6], [8, 10], [15, 18]]], "expected": [[1, 6], [8, 10], [15, 18]] },
+    { "args": [[[1, 4], [4, 5]]], "expected": [[1, 5]] },
+    { "args": [[[4, 7], [1, 10], [-3, -1], [2, 3], [12, 16], [14, 15]]], "expected": [[-3, -1], [1, 10], [12, 16]] }
+  ]
+}

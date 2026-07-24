@@ -1,0 +1,36 @@
+{
+  "id": "lc-hard-frog-jump",
+  "title": "Frog Jump",
+  "difficulty": "Hard",
+  "tags": ["Array", "Dynamic Programming", "Hash Table"],
+  "description": "A frog is crossing a river. The river is divided into some number of units, and at each unit there may or may not exist a stone. The frog can jump on a stone, but it must not jump into the water.\n\nGiven a list of stones' positions (in units) in strictly increasing order, determine if the frog can cross the river by landing on the last stone. Initially, the frog is on the first stone and assumes the first jump must be 1 unit.\n\nIf the frog's last jump was k units, its next jump must be either k - 1, k, or k + 1 units. The frog can only jump in the forward direction.",
+  "examples": [
+    { "input": "stones = [0,1,3,5,6,8,12,17]", "output": "true", "explanation": "The frog can jump to the last stone by jumping 1 unit to the 2nd stone, then 2 units to the 3rd stone, then 2 units to the 4th stone, then 3 units to the 6th stone, 4 units to the 7th stone, and 5 units to the 8th stone." },
+    { "input": "stones = [0,1,2,3,4,8,9,11]", "output": "false", "explanation": "There is no way to jump to the last stone as the gap between the 5th and 6th stone is too large." },
+    { "input": "stones = [0,2]", "output": "false", "explanation": "The first jump must be 1 unit, but the second stone is 2 units away, so the frog immediately falls into the water." }
+  ],
+  "constraints": [
+    "2 <= stones.length <= 2000",
+    "0 <= stones[i] <= 2^31 - 1",
+    "stones[0] == 0",
+    "stones is sorted in a strictly increasing order."
+  ],
+  "functionName": "canCross",
+  "params": ["stones"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} stones\n * @return {boolean}\n */\nvar canCross = function(stones) {\n    \n};",
+    "python": "class Solution:\n    def canCross(self, stones: List[int]) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var canCross = function(stones) {\n    if (!stones || stones.length === 0) return false;\n    if (stones.length === 1) return true;\n\n    const reachable = new Map();\n    for (const position of stones) reachable.set(position, new Set());\n    reachable.get(stones[0]).add(0);\n\n    for (const position of stones) {\n        for (const previousJump of reachable.get(position)) {\n            for (const jump of [previousJump - 1, previousJump, previousJump + 1]) {\n                if (jump > 0 && reachable.has(position + jump)) {\n                    reachable.get(position + jump).add(jump);\n                }\n            }\n        }\n    }\n\n    return reachable.get(stones[stones.length - 1]).size > 0;\n};",
+    "python": "class Solution:\n    def canCross(self, stones: List[int]) -> bool:\n        if not stones:\n            return False\n        if len(stones) == 1:\n            return True\n\n        reachable = {position: set() for position in stones}\n        reachable[stones[0]].add(0)\n\n        for position in stones:\n            for previous_jump in reachable[position]:\n                for jump in (previous_jump - 1, previous_jump, previous_jump + 1):\n                    if jump > 0 and position + jump in reachable:\n                        reachable[position + jump].add(jump)\n\n        return bool(reachable[stones[-1]])"
+  },
+  "approach": "Each state is fully described by a stone position together with the jump length that arrived there. Keep a map from every stone position to the set of jump lengths that can land on it, seeded with {0} at the first stone. Iterating stones in increasing order, for each recorded arrival jump k, try the three legal next jumps k-1, k, k+1; whenever a positive jump lands exactly on another stone, record that jump length at the target. The frog can cross if the final stone has any recorded arrival jump. With n stones there are O(n^2) position/jump states, giving O(n^2) time and space.",
+  "complexity": { "time": "O(n^2)", "space": "O(n^2)" },
+  "tests": [
+    { "args": [[0,1,3,5,6,8,12,17]], "expected": true },
+    { "args": [[0,1,2,3,4,8,9,11]], "expected": false },
+    { "args": [[0,2]], "expected": false }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "lc-easy-climbing-stairs",
+  "title": "Climbing Stairs",
+  "difficulty": "Easy",
+  "tags": ["Math", "Dynamic Programming", "Memoization"],
+  "description": "You are climbing a staircase. It takes n steps to reach the top.\n\nEach time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?\n\nReturn the number of distinct ways to climb to the top.",
+  "examples": [
+    { "input": "n = 2", "output": "2", "explanation": "There are two ways to climb to the top: 1 step + 1 step, or 2 steps." },
+    { "input": "n = 3", "output": "3", "explanation": "There are three ways to climb to the top: 1+1+1, 1+2, or 2+1." }
+  ],
+  "constraints": [
+    "1 <= n <= 45"
+  ],
+  "functionName": "climbStairs",
+  "params": ["n"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number} n\n * @return {number}\n */\nvar climbStairs = function(n) {\n    \n};",
+    "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var climbStairs = function(n) {\n    let waysTwoBack = 1;\n    let waysOneBack = 1;\n    for (let step = 2; step <= n; step++) {\n        const next = waysTwoBack + waysOneBack;\n        waysTwoBack = waysOneBack;\n        waysOneBack = next;\n    }\n    return waysOneBack;\n};",
+    "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        ways_two_back = 1\n        ways_one_back = 1\n\n        for step in range(2, n + 1):\n            ways_two_back, ways_one_back = (\n                ways_one_back,\n                ways_two_back + ways_one_back\n            )\n\n        return ways_one_back"
+  },
+  "approach": "To reach step k, the final move comes from k - 1 or k - 2, so ways(k) = ways(k - 1) + ways(k - 2) — the Fibonacci recurrence. Starting with one way to stand at step 0 and one way to reach step 1, iterate up to n while retaining only the last two counts. The loop takes O(n) time and uses O(1) auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": [3], "expected": 3 },
+    { "args": [1], "expected": 1 },
+    { "args": [45], "expected": 1836311903 }
+  ]
+}

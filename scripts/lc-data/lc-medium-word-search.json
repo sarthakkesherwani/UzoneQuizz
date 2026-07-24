@@ -1,0 +1,49 @@
+{
+  "id": "lc-medium-word-search",
+  "title": "Word Search",
+  "difficulty": "Medium",
+  "tags": ["Array", "String", "Backtracking", "Matrix"],
+  "description": "Given an m x n grid of characters board and a string word, return true if word exists in the grid.\n\nThe word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same cell may not be used more than once.",
+  "examples": [
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]], word = \"ABCCED\"",
+      "output": "true",
+      "explanation": "Starting at the top-left 'A', the path A -> B -> C -> C -> E -> D moves through adjacent cells without reusing any cell."
+    },
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]], word = \"SEE\"",
+      "output": "true",
+      "explanation": "The trace starts at the 'S' in the second row's last column, then moves down and left through two 'E' cells."
+    },
+    {
+      "input": "board = [[\"A\",\"B\",\"C\",\"E\"],[\"S\",\"F\",\"C\",\"S\"],[\"A\",\"D\",\"E\",\"E\"]], word = \"ABCB\"",
+      "output": "false",
+      "explanation": "The only way to spell \"ABCB\" would reuse the 'B' cell, which is not allowed."
+    }
+  ],
+  "constraints": [
+    "m == board.length",
+    "n == board[i].length",
+    "1 <= m, n <= 6",
+    "1 <= word.length <= 15",
+    "board and word consist of only lowercase and uppercase English letters."
+  ],
+  "functionName": "exist",
+  "params": ["board", "word"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {character[][]} board\n * @param {string} word\n * @return {boolean}\n */\nvar exist = function(board, word) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def exist(self, board: List[List[str]], word: str) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var exist = function(board, word) {\n    if (word.length === 0) return true;\n    if (!board || !board.length || !board[0].length) return false;\n    const rows = board.length;\n    const cols = board[0].length;\n\n    const search = (row, col, index) => {\n        if (index === word.length) return true;\n        if (row < 0 || row >= rows || col < 0 || col >= cols || board[row][col] !== word[index]) {\n            return false;\n        }\n        const saved = board[row][col];\n        board[row][col] = '#';\n        const found =\n            search(row + 1, col, index + 1) ||\n            search(row - 1, col, index + 1) ||\n            search(row, col + 1, index + 1) ||\n            search(row, col - 1, index + 1);\n        board[row][col] = saved;\n        return found;\n    };\n\n    for (let row = 0; row < rows; row++) {\n        for (let col = 0; col < cols; col++) {\n            if (search(row, col, 0)) return true;\n        }\n    }\n    return false;\n};",
+    "python": "from typing import List\n\n\nclass Solution:\n    def exist(self, board: List[List[str]], word: str) -> bool:\n        if word == \"\":\n            return True\n        if not board or not board[0]:\n            return False\n\n        rows, cols = len(board), len(board[0])\n\n        def search(row: int, col: int, index: int) -> bool:\n            if index == len(word):\n                return True\n            if (\n                row < 0\n                or row >= rows\n                or col < 0\n                or col >= cols\n                or board[row][col] != word[index]\n            ):\n                return False\n\n            saved = board[row][col]\n            board[row][col] = \"#\"\n            found = (\n                search(row + 1, col, index + 1)\n                or search(row - 1, col, index + 1)\n                or search(row, col + 1, index + 1)\n                or search(row, col - 1, index + 1)\n            )\n            board[row][col] = saved\n            return found\n\n        for row in range(rows):\n            for col in range(cols):\n                if search(row, col, 0):\n                    return True\n        return False"
+  },
+  "approach": "Try each cell as the first character. A DFS advances to an orthogonal neighbor only when it matches the next character; temporarily marking the current cell (e.g. with '#') prevents reuse on that path, and restoring it on backtracking lets other paths use the cell. If L is the word length, time complexity is O(rows * cols * 3^L) as a standard upper bound (after the first step, the previous cell is unavailable). Space complexity is O(L) for the recursion stack; the board itself supplies the visited marking.",
+  "complexity": { "time": "O(m * n * 3^L)", "space": "O(L)" },
+  "tests": [
+    { "args": [[["A", "B", "C", "E"], ["S", "F", "C", "S"], ["A", "D", "E", "E"]], "ABCCED"], "expected": true },
+    { "args": [[["A", "B", "C", "E"], ["S", "F", "C", "S"], ["A", "D", "E", "E"]], "ABCB"], "expected": false },
+    { "args": [[["A", "A", "A", "A"], ["A", "A", "A", "A"], ["A", "A", "A", "B"]], "AAAAAAAAAAAB"], "expected": true }
+  ]
+}

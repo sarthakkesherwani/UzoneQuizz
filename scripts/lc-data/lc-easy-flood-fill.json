@@ -1,0 +1,45 @@
+{
+  "id": "lc-easy-flood-fill",
+  "title": "Flood Fill",
+  "difficulty": "Easy",
+  "tags": ["Array", "Depth-First Search", "Breadth-First Search", "Matrix"],
+  "description": "You are given an image represented by an m x n grid of integers image, where image[i][j] represents the pixel value of the image. You are also given three integers sr, sc, and color. Your task is to perform a flood fill on the image starting from the pixel image[sr][sc].\n\nTo perform a flood fill: begin with the starting pixel and change its color to color. Then, perform the same process for each pixel that is directly adjacent (pixels that share a side with the original pixel, either horizontally or vertically) and shares the same color as the starting pixel. Keep repeating this process by checking neighboring pixels of the updated pixels and modifying their color if it matches the original color of the starting pixel.\n\nReturn the modified image after performing the flood fill.",
+  "examples": [
+    {
+      "input": "image = [[1,1,1],[1,1,0],[1,0,1]], sr = 1, sc = 1, color = 2",
+      "output": "[[2,2,2],[2,2,0],[2,0,1]]",
+      "explanation": "From the center of the image (position (1, 1)), all pixels connected by a path of the same color as the starting pixel (1) are colored with the new color (2). Note the bottom corner is not colored 2, because it is not horizontally or vertically connected to the starting pixel."
+    },
+    {
+      "input": "image = [[0,0,0],[0,0,0]], sr = 0, sc = 0, color = 0",
+      "output": "[[0,0,0],[0,0,0]]",
+      "explanation": "The starting pixel is already colored with color, so no changes are made to the image."
+    }
+  ],
+  "constraints": [
+    "m == image.length",
+    "n == image[i].length",
+    "1 <= m, n <= 50",
+    "0 <= image[i][j], color < 2^16",
+    "0 <= sr < m",
+    "0 <= sc < n"
+  ],
+  "functionName": "floodFill",
+  "params": ["image", "sr", "sc", "color"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[][]} image\n * @param {number} sr\n * @param {number} sc\n * @param {number} color\n * @return {number[][]}\n */\nvar floodFill = function(image, sr, sc, color) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var floodFill = function(image, sr, sc, color) {\n    const original = image[sr][sc];\n    if (original === color) return image;\n    const rows = image.length, cols = image[0].length;\n    const queue = [[sr, sc]];\n    image[sr][sc] = color;\n    while (queue.length) {\n        const [row, col] = queue.shift();\n        for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {\n            const nr = row + dr, nc = col + dc;\n            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && image[nr][nc] === original) {\n                image[nr][nc] = color;\n                queue.push([nr, nc]);\n            }\n        }\n    }\n    return image;\n};",
+    "python": "from collections import deque\nfrom typing import List\n\nclass Solution:\n    def floodFill(\n        self,\n        image: List[List[int]],\n        sr: int,\n        sc: int,\n        color: int\n    ) -> List[List[int]]:\n        original = image[sr][sc]\n        if original == color:\n            return image\n\n        rows, cols = len(image), len(image[0])\n        queue = deque([(sr, sc)])\n        image[sr][sc] = color\n\n        while queue:\n            row, col = queue.popleft()\n            for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                nr, nc = row + dr, col + dc\n                if (0 <= nr < rows and 0 <= nc < cols\n                        and image[nr][nc] == original):\n                    image[nr][nc] = color\n                    queue.append((nr, nc))\n\n        return image"
+  },
+  "approach": "Record the original color and traverse the connected component with BFS or DFS. Recolor a cell as soon as it is discovered, which also marks it visited. If the replacement equals the original color, return immediately to avoid revisiting forever. At most rows × columns cells are processed, so time is O(rows × columns). The traversal queue can contain O(rows × columns) cells in the worst case, so auxiliary space is O(rows × columns).",
+  "complexity": { "time": "O(m * n)", "space": "O(m * n)" },
+  "tests": [
+    { "args": [[[1, 1, 1], [1, 1, 0], [1, 0, 1]], 1, 1, 2], "expected": [[2, 2, 2], [2, 2, 0], [2, 0, 1]] },
+    { "args": [[[0, 0, 0], [0, 0, 0]], 0, 0, 0], "expected": [[0, 0, 0], [0, 0, 0]] },
+    { "args": [[[1, 2, 1], [2, 1, 2], [1, 2, 1]], 1, 1, 3], "expected": [[1, 2, 1], [2, 3, 2], [1, 2, 1]] }
+  ]
+}

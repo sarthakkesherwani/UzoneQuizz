@@ -1,0 +1,35 @@
+{
+  "id": "lc-easy-single-number",
+  "title": "Single Number",
+  "difficulty": "Easy",
+  "tags": ["Array", "Bit Manipulation"],
+  "description": "Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.\n\nYou must implement a solution with a linear runtime complexity and use only constant extra space.",
+  "examples": [
+    { "input": "nums = [2,2,1]", "output": "1", "explanation": "2 appears twice; 1 appears only once." },
+    { "input": "nums = [4,1,2,1,2]", "output": "4", "explanation": "1 and 2 each appear twice; 4 appears only once." },
+    { "input": "nums = [1]", "output": "1" }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 3 * 10^4",
+    "-3 * 10^4 <= nums[i] <= 3 * 10^4",
+    "Each element in the array appears twice except for one element which appears only once."
+  ],
+  "functionName": "singleNumber",
+  "params": ["nums"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar singleNumber = function(nums) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var singleNumber = function(nums) {\n    let result = 0;\n    for (const value of nums) {\n        result ^= value;\n    }\n    return result;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        result = 0\n        for value in nums:\n            result ^= value\n        return result"
+  },
+  "approach": "XOR is associative and commutative, x XOR x equals 0, and 0 XOR x equals x. Therefore all duplicated values cancel regardless of order, leaving only the unpaired value. The array is scanned once for O(n) time, and one accumulator is stored for O(1) auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": [[4, 1, 2, 1, 2]], "expected": 4 },
+    { "args": [[-1]], "expected": -1 },
+    { "args": [[7, 3, -5, 3, 7, -5, 9]], "expected": 9 }
+  ]
+}

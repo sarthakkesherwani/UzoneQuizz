@@ -1,0 +1,35 @@
+{
+  "id": "lc-easy-majority-element",
+  "title": "Majority Element",
+  "difficulty": "Easy",
+  "tags": ["Array", "Hash Table", "Divide and Conquer", "Sorting", "Counting"],
+  "description": "Given an array nums of size n, return the majority element.\n\nThe majority element is the element that appears more than floor(n / 2) times. You may assume that the majority element always exists in the array.",
+  "examples": [
+    { "input": "nums = [3,2,3]", "output": "3" },
+    { "input": "nums = [2,2,1,1,1,2,2]", "output": "2", "explanation": "2 appears 4 times out of 7, which is more than floor(7 / 2) = 3." }
+  ],
+  "constraints": [
+    "n == nums.length",
+    "1 <= n <= 5 * 10^4",
+    "-10^9 <= nums[i] <= 10^9",
+    "The majority element always exists in the array."
+  ],
+  "functionName": "majorityElement",
+  "params": ["nums"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar majorityElement = function(nums) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def majorityElement(self, nums: List[int]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var majorityElement = function(nums) {\n    let candidate = null;\n    let balance = 0;\n    for (const value of nums) {\n        if (balance === 0) candidate = value;\n        balance += value === candidate ? 1 : -1;\n    }\n    return candidate;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def majorityElement(self, nums: List[int]) -> int:\n        candidate = None\n        balance = 0\n\n        for value in nums:\n            if balance == 0:\n                candidate = value\n            balance += 1 if value == candidate else -1\n\n        return candidate"
+  },
+  "approach": "Boyer-Moore voting keeps a candidate and a balance. A zero balance starts a new candidate; matching values increment the balance and different values decrement it. Because the majority outnumbers all other values combined, pairwise cancellation cannot eliminate it, and the guarantee removes the need for a verification pass. Time is O(n), and the candidate plus counter use O(1) auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": [[3, 2, 3]], "expected": 3 },
+    { "args": [[1]], "expected": 1 },
+    { "args": [[-5, -5, 7, -5, 7, -5, 3, -5, -5]], "expected": -5 }
+  ]
+}

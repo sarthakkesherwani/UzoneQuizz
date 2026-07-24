@@ -1,0 +1,34 @@
+{
+  "id": "lc-easy-diameter-binary-tree",
+  "title": "Diameter of Binary Tree",
+  "difficulty": "Easy",
+  "tags": ["Tree", "Depth-First Search", "Binary Tree"],
+  "description": "Given the root of a binary tree, return the length of the diameter of the tree.\n\nThe diameter of a binary tree is the length of the longest path between any two nodes in the tree. This path may or may not pass through the root.\n\nThe length of a path between two nodes is represented by the number of edges between them.",
+  "examples": [
+    { "input": "root = [1,2,3,4,5]", "output": "3", "explanation": "3 is the length of the path [4,2,1,3] or [5,2,1,3]." },
+    { "input": "root = [1,2]", "output": "1" }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [1, 10^4].",
+    "-100 <= Node.val <= 100"
+  ],
+  "functionName": "diameterOfBinaryTree",
+  "params": ["root"],
+  "judge": "exact",
+  "argStructures": { "root": "tree" },
+  "starter": {
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number}\n */\nvar diameterOfBinaryTree = function(root) {\n    \n};",
+    "python": "from typing import Optional\n\nclass Solution:\n    def diameterOfBinaryTree(self, root: Optional[\"TreeNode\"]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var diameterOfBinaryTree = function(root) {\n    let diameter = 0;\n    const height = (node) => {\n        if (node === null) return 0;\n        const leftHeight = height(node.left);\n        const rightHeight = height(node.right);\n        diameter = Math.max(diameter, leftHeight + rightHeight);\n        return 1 + Math.max(leftHeight, rightHeight);\n    };\n    height(root);\n    return diameter;\n};",
+    "python": "from typing import Optional\n\n# TreeNode is supplied by the LeetCode judge.\nclass Solution:\n    def diameterOfBinaryTree(self, root: Optional[\"TreeNode\"]) -> int:\n        diameter = 0\n\n        def height(node: Optional[\"TreeNode\"]) -> int:\n            nonlocal diameter\n            if node is None:\n                return 0\n\n            left_height = height(node.left)\n            right_height = height(node.right)\n            diameter = max(diameter, left_height + right_height)\n            return 1 + max(left_height, right_height)\n\n        height(root)\n        return diameter"
+  },
+  "approach": "For every node, a longest path whose highest point is that node uses the deepest route in its left subtree plus the deepest route in its right subtree. A postorder DFS obtains those heights and updates a global maximum before returning the node's height to its parent. Every node is visited once, so time is O(n). The recursion stack uses O(h) auxiliary space, where h is tree height.",
+  "complexity": { "time": "O(n)", "space": "O(h)" },
+  "tests": [
+    { "args": [[1, 2, 3, 4, 5]], "expected": 3 },
+    { "args": [[1]], "expected": 0 },
+    { "args": [[1, 2, null, 3, 4, 5, null, null, 6, 7, null, null, 8]], "expected": 6 }
+  ]
+}

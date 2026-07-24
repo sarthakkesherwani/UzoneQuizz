@@ -1,0 +1,38 @@
+{
+  "id": "lc-hard-word-ladder",
+  "title": "Word Ladder",
+  "difficulty": "Hard",
+  "tags": ["Hash Table", "String", "Breadth-First Search"],
+  "description": "A transformation sequence from word beginWord to word endWord using a dictionary wordList is a sequence of words beginWord -> s1 -> s2 -> ... -> sk such that:\n\n- Every adjacent pair of words differs by a single letter.\n- Every si for 1 <= i <= k is in wordList. Note that beginWord does not need to be in wordList.\n- sk == endWord.\n\nGiven beginWord, endWord, and wordList, return the number of words in the shortest transformation sequence from beginWord to endWord, or 0 if no such sequence exists. All words have the same length and consist of lowercase English letters.",
+  "examples": [
+    { "input": "beginWord = \"hit\", endWord = \"cog\", wordList = [\"hot\",\"dot\",\"dog\",\"lot\",\"log\",\"cog\"]", "output": "5", "explanation": "One shortest transformation is \"hit\" -> \"hot\" -> \"dot\" -> \"dog\" -> \"cog\", which is 5 words long." },
+    { "input": "beginWord = \"hit\", endWord = \"cog\", wordList = [\"hot\",\"dot\",\"dog\",\"lot\",\"log\"]", "output": "0", "explanation": "The endWord \"cog\" is not in wordList, so no valid transformation sequence exists." }
+  ],
+  "constraints": [
+    "1 <= beginWord.length <= 10",
+    "endWord.length == beginWord.length",
+    "1 <= wordList.length <= 5000",
+    "wordList[i].length == beginWord.length",
+    "beginWord, endWord, and wordList[i] consist of lowercase English letters.",
+    "beginWord != endWord.",
+    "All the words in wordList are unique."
+  ],
+  "functionName": "ladderLength",
+  "params": ["beginWord", "endWord", "wordList"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} beginWord\n * @param {string} endWord\n * @param {string[]} wordList\n * @return {number}\n */\nvar ladderLength = function(beginWord, endWord, wordList) {\n    \n};",
+    "python": "class Solution:\n    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var ladderLength = function(beginWord, endWord, wordList) {\n    if (beginWord === endWord) return 1;\n\n    const unused = new Set(wordList);\n    if (!unused.has(endWord)) return 0;\n\n    let front = new Set([beginWord]);\n    let back = new Set([endWord]);\n    unused.delete(beginWord);\n    unused.delete(endWord);\n    let steps = 1;\n\n    while (front.size > 0) {\n        if (front.size > back.size) {\n            const tmp = front; front = back; back = tmp;\n        }\n\n        const nextFront = new Set();\n        for (const word of front) {\n            const letters = word.split('');\n            for (let index = 0; index < letters.length; index++) {\n                const original = letters[index];\n                for (let code = 97; code <= 122; code++) {\n                    const replacement = String.fromCharCode(code);\n                    if (replacement === original) continue;\n                    letters[index] = replacement;\n                    const candidate = letters.join('');\n                    if (back.has(candidate)) return steps + 1;\n                    if (unused.has(candidate)) {\n                        unused.delete(candidate);\n                        nextFront.add(candidate);\n                    }\n                }\n                letters[index] = original;\n            }\n        }\n\n        front = nextFront;\n        steps += 1;\n    }\n\n    return 0;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:\n        if beginWord == endWord:\n            return 1\n\n        unused = set(wordList)\n        if endWord not in unused:\n            return 0\n\n        front = {beginWord}\n        back = {endWord}\n        unused.discard(beginWord)\n        unused.discard(endWord)\n        steps = 1\n\n        while front:\n            if len(front) > len(back):\n                front, back = back, front\n\n            next_front = set()\n            for word in front:\n                letters = list(word)\n                for index, original in enumerate(letters):\n                    for code in range(ord('a'), ord('z') + 1):\n                        replacement = chr(code)\n                        if replacement == original:\n                            continue\n                        letters[index] = replacement\n                        candidate = ''.join(letters)\n                        if candidate in back:\n                            return steps + 1\n                        if candidate in unused:\n                            unused.remove(candidate)\n                            next_front.add(candidate)\n                    letters[index] = original\n\n            front = next_front\n            steps += 1\n\n        return 0\n"
+  },
+  "approach": "Model words as graph vertices with unweighted edges between words differing by a single letter, so the shortest sequence is a shortest path found by breadth-first search. Bidirectional BFS expands from both beginWord and endWord, always growing the smaller frontier to keep the explored region small. For each word in the frontier, try all 26 letters at every position; if a candidate lies in the opposite frontier the paths meet and the answer is steps + 1, otherwise unseen dictionary words join the next frontier. For N words of length L, this is O(N*L^2) time and O(N*L) space.",
+  "complexity": { "time": "O(N*L^2)", "space": "O(N*L)" },
+  "tests": [
+    { "args": ["hit", "cog", ["hot", "dot", "dog", "lot", "log", "cog"]], "expected": 5 },
+    { "args": ["hit", "cog", ["hot", "dot", "dog", "lot", "log"]], "expected": 0 },
+    { "args": ["a", "c", ["a", "b", "c"]], "expected": 2 }
+  ]
+}

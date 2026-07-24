@@ -1,0 +1,36 @@
+{
+  "id": "lc-hard-minimum-window-substring",
+  "title": "Minimum Window Substring",
+  "difficulty": "Hard",
+  "tags": ["String", "Sliding Window", "Hash Table"],
+  "description": "Given two strings s and t, return the shortest contiguous substring of s such that every character of t (including duplicates) is contained in the window.\n\nIf there is no such substring, return the empty string \"\".\n\nThe answer is guaranteed to be unique.",
+  "examples": [
+    { "input": "s = \"ADOBECODEBANC\", t = \"ABC\"", "output": "\"BANC\"", "explanation": "The minimum window substring \"BANC\" includes 'A', 'B', and 'C' from t." },
+    { "input": "s = \"a\", t = \"a\"", "output": "\"a\"", "explanation": "The entire string s is the minimum window." },
+    { "input": "s = \"a\", t = \"aa\"", "output": "\"\"", "explanation": "Both 'a's from t must be included in the window. Since s only has one 'a', return the empty string." }
+  ],
+  "constraints": [
+    "m == s.length",
+    "n == t.length",
+    "1 <= m, n <= 10^5",
+    "s and t consist of uppercase and lowercase English letters."
+  ],
+  "functionName": "minWindow",
+  "params": ["s", "t"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @param {string} t\n * @return {string}\n */\nvar minWindow = function(s, t) {\n    \n};",
+    "python": "class Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        pass"
+  },
+  "solution": {
+    "javascript": "var minWindow = function(s, t) {\n    if (!t || !s) return \"\";\n    const need = {};\n    for (const ch of t) need[ch] = (need[ch] || 0) + 1;\n    let missing = t.length;\n    let left = 0, bestLen = Infinity, bestLeft = 0;\n    for (let right = 0; right < s.length; right++) {\n        const ch = s[right];\n        if ((need[ch] || 0) > 0) missing--;\n        need[ch] = (need[ch] || 0) - 1;\n        if (missing === 0) {\n            while (need[s[left]] < 0) {\n                need[s[left]]++;\n                left++;\n            }\n            if (right + 1 - left < bestLen) {\n                bestLen = right + 1 - left;\n                bestLeft = left;\n            }\n            need[s[left]]++;\n            missing++;\n            left++;\n        }\n    }\n    return bestLen === Infinity ? \"\" : s.slice(bestLeft, bestLeft + bestLen);\n};",
+    "python": "from collections import Counter\n\nclass Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        if not t or not s:\n            return \"\"\n\n        need = Counter(t)\n        missing = len(t)\n        left = 0\n        best_length = float(\"inf\")\n        best_left = 0\n\n        for right, ch in enumerate(s, 1):\n            if need[ch] > 0:\n                missing -= 1\n            need[ch] -= 1\n\n            if missing == 0:\n                while need[s[left]] < 0:\n                    need[s[left]] += 1\n                    left += 1\n\n                if right - left < best_length:\n                    best_length = right - left\n                    best_left = left\n\n                need[s[left]] += 1\n                missing += 1\n                left += 1\n\n        if best_length == float(\"inf\"):\n            return \"\"\n        return s[best_left:best_left + best_length]"
+  },
+  "approach": "Slide a window over s with two pointers. Keep a counter of the characters still needed from t and a `missing` total of outstanding required copies. Expanding the right edge decrements the count for that character and, when it was still required, decrements `missing`. Once `missing` hits zero the window covers t; shrink the left edge past any surplus characters (those whose count went negative), record the window if it is the shortest so far, then release one required character to search for the next valid window. Each character enters and leaves the window at most once, giving linear time.",
+  "complexity": { "time": "O(m + n)", "space": "O(u)" },
+  "tests": [
+    { "args": ["ADOBECODEBANC", "ABC"], "expected": "BANC" },
+    { "args": ["a", "a"], "expected": "a" },
+    { "args": ["a", "aa"], "expected": "" }
+  ]
+}

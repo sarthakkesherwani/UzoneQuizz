@@ -1,0 +1,44 @@
+{
+  "id": "lc-medium-course-schedule",
+  "title": "Course Schedule",
+  "difficulty": "Medium",
+  "tags": ["Graph", "Topological Sort", "Breadth-First Search", "Depth-First Search"],
+  "description": "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [a, b] indicates that you must take course b first if you want to take course a.\n\nFor example, the pair [0, 1] indicates that to take course 0 you have to first take course 1.\n\nReturn true if you can finish all courses. Otherwise, return false.",
+  "examples": [
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0]]",
+      "output": "true",
+      "explanation": "There are 2 courses to take. To take course 1 you should have finished course 0. So it is possible."
+    },
+    {
+      "input": "numCourses = 2, prerequisites = [[1,0],[0,1]]",
+      "output": "false",
+      "explanation": "There are 2 courses to take. To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible."
+    }
+  ],
+  "constraints": [
+    "1 <= numCourses <= 2000",
+    "0 <= prerequisites.length <= 5000",
+    "prerequisites[i].length == 2",
+    "0 <= a, b < numCourses",
+    "All the pairs prerequisites[i] are unique."
+  ],
+  "functionName": "canFinish",
+  "params": ["numCourses", "prerequisites"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number} numCourses\n * @param {number[][]} prerequisites\n * @return {boolean}\n */\nvar canFinish = function(numCourses, prerequisites) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var canFinish = function(numCourses, prerequisites) {\n    const graph = Array.from({ length: numCourses }, () => []);\n    const indegree = new Array(numCourses).fill(0);\n\n    for (const [course, prerequisite] of prerequisites) {\n        graph[prerequisite].push(course);\n        indegree[course] += 1;\n    }\n\n    const ready = [];\n    for (let course = 0; course < numCourses; course++) {\n        if (indegree[course] === 0) ready.push(course);\n    }\n\n    let completed = 0;\n    let head = 0;\n    while (head < ready.length) {\n        const prerequisite = ready[head++];\n        completed += 1;\n        for (const course of graph[prerequisite]) {\n            indegree[course] -= 1;\n            if (indegree[course] === 0) ready.push(course);\n        }\n    }\n\n    return completed === numCourses;\n};",
+    "python": "from collections import deque\nfrom typing import List\n\n\nclass Solution:\n    def canFinish(\n        self, numCourses: int, prerequisites: List[List[int]]\n    ) -> bool:\n        graph = [[] for _ in range(numCourses)]\n        indegree = [0] * numCourses\n\n        for course, prerequisite in prerequisites:\n            graph[prerequisite].append(course)\n            indegree[course] += 1\n\n        ready = deque(\n            course for course in range(numCourses) if indegree[course] == 0\n        )\n        completed = 0\n\n        while ready:\n            prerequisite = ready.popleft()\n            completed += 1\n            for course in graph[prerequisite]:\n                indegree[course] -= 1\n                if indegree[course] == 0:\n                    ready.append(course)\n\n        return completed == numCourses"
+  },
+  "approach": "Model the courses as a directed graph: build edges from each prerequisite to the courses it unlocks and count each course's indegree. Then run Kahn's topological sort: repeatedly remove zero-indegree courses from a queue, decrementing the indegree of their neighbors and enqueueing any that drop to zero. All courses are feasible exactly when the processed count reaches numCourses; if a directed cycle remains, none of its courses ever reaches indegree zero, so they are never processed. With V courses and E prerequisite pairs, time complexity is O(V + E) and space complexity is O(V + E).",
+  "complexity": { "time": "O(V + E)", "space": "O(V + E)" },
+  "tests": [
+    { "args": [2, [[1, 0]]], "expected": true },
+    { "args": [2, [[1, 0], [0, 1]]], "expected": false },
+    { "args": [6, [[1, 0], [2, 1], [3, 2], [4, 2], [5, 4], [2, 5]]], "expected": false }
+  ]
+}

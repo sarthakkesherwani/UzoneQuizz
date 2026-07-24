@@ -1,0 +1,33 @@
+{
+  "id": "lc-easy-intersection-two-arrays-ii",
+  "title": "Intersection of Two Arrays II",
+  "difficulty": "Easy",
+  "tags": ["Array", "Hash Table", "Two Pointers", "Sorting"],
+  "description": "Given two integer arrays nums1 and nums2, return an array of their intersection. Each element in the result must appear as many times as it shows in both arrays, and you may return the result in any order.",
+  "examples": [
+    { "input": "nums1 = [1,2,2,1], nums2 = [2,2]", "output": "[2,2]", "explanation": "2 appears twice in both arrays, so it appears twice in the intersection." },
+    { "input": "nums1 = [4,9,5], nums2 = [9,4,9,8,4]", "output": "[4,9]", "explanation": "[9,4] is also accepted. 4 and 9 each appear at least once in both arrays." }
+  ],
+  "constraints": [
+    "1 <= nums1.length, nums2.length <= 1000",
+    "0 <= nums1[i], nums2[i] <= 1000"
+  ],
+  "functionName": "intersect",
+  "params": ["nums1", "nums2"],
+  "judge": "unordered",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums1\n * @param {number[]} nums2\n * @return {number[]}\n */\nvar intersect = function(nums1, nums2) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var intersect = function(nums1, nums2) {\n    if (nums1.length > nums2.length) {\n        const tmp = nums1;\n        nums1 = nums2;\n        nums2 = tmp;\n    }\n    const remaining = new Map();\n    for (const value of nums1) {\n        remaining.set(value, (remaining.get(value) || 0) + 1);\n    }\n    const intersection = [];\n    for (const value of nums2) {\n        const count = remaining.get(value) || 0;\n        if (count > 0) {\n            intersection.push(value);\n            remaining.set(value, count - 1);\n        }\n    }\n    return intersection;\n};",
+    "python": "from collections import Counter\nfrom typing import List\n\nclass Solution:\n    def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:\n        if len(nums1) > len(nums2):\n            nums1, nums2 = nums2, nums1\n\n        remaining = Counter(nums1)\n        intersection = []\n\n        for value in nums2:\n            if remaining[value] > 0:\n                intersection.append(value)\n                remaining[value] -= 1\n\n        return intersection"
+  },
+  "approach": "Build a frequency map for the shorter array to minimize extra storage. While scanning the other array, emit a value only when its remaining count is positive, then decrement that count. Each input element is processed once on average, so time is O(m + n). The frequency map uses O(min(m, n)) auxiliary space in the worst case, excluding the required output list.",
+  "complexity": { "time": "O(m + n)", "space": "O(min(m, n))" },
+  "tests": [
+    { "args": [[1, 2, 2, 1], [2, 2]], "expected": [2, 2] },
+    { "args": [[1], [1, 1, 1]], "expected": [1] },
+    { "args": [[4, 9, 5], [9, 4, 9, 8, 4]], "expected": [9, 4] }
+  ]
+}

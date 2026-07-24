@@ -1,0 +1,33 @@
+{
+  "id": "lc-hard-n-queens",
+  "title": "N-Queens",
+  "difficulty": "Hard",
+  "tags": ["Array", "Backtracking"],
+  "description": "The n-queens puzzle is the problem of placing n queens on an n x n chessboard such that no two queens attack each other. Two queens attack each other if they share the same row, column, or diagonal.\n\nGiven an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.\n\nEach solution contains a distinct board configuration of the n-queens' placement, where 'Q' and '.' both indicate a queen and an empty space, respectively.",
+  "examples": [
+    { "input": "n = 4", "output": "[[\".Q..\",\"...Q\",\"Q...\",\"..Q.\"],[\"..Q.\",\"Q...\",\"...Q\",\".Q..\"]]", "explanation": "There are two distinct solutions to the 4-queens puzzle." },
+    { "input": "n = 1", "output": "[[\"Q\"]]", "explanation": "A single queen on a 1x1 board." },
+    { "input": "n = 2", "output": "[]", "explanation": "No arrangement of 2 queens on a 2x2 board avoids mutual attack." }
+  ],
+  "constraints": [
+    "1 <= n <= 9"
+  ],
+  "functionName": "solveNQueens",
+  "params": ["n"],
+  "judge": "unordered_inner",
+  "starter": {
+    "javascript": "/**\n * @param {number} n\n * @return {string[][]}\n */\nvar solveNQueens = function(n) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def solveNQueens(self, n: int) -> List[List[str]]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var solveNQueens = function(n) {\n    const columns = new Set();\n    const diagDown = new Set();\n    const diagUp = new Set();\n    const placement = new Array(n).fill(-1);\n    const answers = [];\n\n    const search = (row) => {\n        if (row === n) {\n            const board = [];\n            for (const col of placement) {\n                board.push('.'.repeat(col) + 'Q' + '.'.repeat(n - col - 1));\n            }\n            answers.push(board);\n            return;\n        }\n        for (let col = 0; col < n; col++) {\n            const down = row - col;\n            const up = row + col;\n            if (columns.has(col) || diagDown.has(down) || diagUp.has(up)) continue;\n            columns.add(col);\n            diagDown.add(down);\n            diagUp.add(up);\n            placement[row] = col;\n            search(row + 1);\n            columns.delete(col);\n            diagDown.delete(down);\n            diagUp.delete(up);\n        }\n    };\n\n    search(0);\n    return answers;\n};",
+    "python": "from typing import List\n\n\nclass Solution:\n    def solveNQueens(self, n: int) -> List[List[str]]:\n        columns = set()\n        diag_down = set()  # row - column\n        diag_up = set()    # row + column\n        placement = [-1] * n\n        answers = []\n\n        def search(row: int) -> None:\n            if row == n:\n                board = []\n                for col in placement:\n                    board.append('.' * col + 'Q' + '.' * (n - col - 1))\n                answers.append(board)\n                return\n\n            for col in range(n):\n                down, up = row - col, row + col\n                if col in columns or down in diag_down or up in diag_up:\n                    continue\n                columns.add(col)\n                diag_down.add(down)\n                diag_up.add(up)\n                placement[row] = col\n                search(row + 1)\n                columns.remove(col)\n                diag_down.remove(down)\n                diag_up.remove(up)\n\n        search(0)\n        return answers\n"
+  },
+  "approach": "Place exactly one queen per row and backtrack. Track occupied columns and both diagonal directions (row - col and row + col) in sets so each safety check is O(1); prune a branch immediately when a column or diagonal conflicts. When a queen has been placed in every row, render the placement array into 'Q'/'.' strings and record it. Search time is O(n!) under the conventional upper bound, plus O(S * n^2) to build the S returned boards; auxiliary space is O(n) for the placement array, recursion, and conflict sets (output excluded).",
+  "complexity": { "time": "O(n!)", "space": "O(n)" },
+  "tests": [
+    { "args": [4], "expected": [[".Q..", "...Q", "Q...", "..Q."], ["..Q.", "Q...", "...Q", ".Q.."]] },
+    { "args": [1], "expected": [["Q"]] },
+    { "args": [2], "expected": [] }
+  ]
+}

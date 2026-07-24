@@ -1,0 +1,59 @@
+{
+  "id": "lc-hard-word-break-ii",
+  "title": "Word Break II",
+  "difficulty": "Hard",
+  "tags": ["Dynamic Programming", "Backtracking", "Trie", "Memoization", "String"],
+  "description": "Given a string s and a dictionary of strings wordDict, add spaces in s to construct a sentence where each word is a valid dictionary word. Return all such possible sentences in any order.\n\nThe same dictionary word may be reused multiple times in the segmentation. Every character of s must be used, and the segments must appear in their original left-to-right order.",
+  "examples": [
+    {
+      "input": "s = \"catsanddog\", wordDict = [\"cat\",\"cats\",\"and\",\"sand\",\"dog\"]",
+      "output": "[\"cats and dog\",\"cat sand dog\"]",
+      "explanation": "Both segmentations cover every character in order using only dictionary words."
+    },
+    {
+      "input": "s = \"pineapplepenapple\", wordDict = [\"apple\",\"pen\",\"applepen\",\"pine\",\"pineapple\"]",
+      "output": "[\"pine apple pen apple\",\"pineapple pen apple\",\"pine applepen apple\"]",
+      "explanation": "Note that reusing the dictionary word 'apple' is allowed."
+    },
+    {
+      "input": "s = \"catsandog\", wordDict = [\"cats\",\"dog\",\"sand\",\"and\",\"cat\"]",
+      "output": "[]",
+      "explanation": "There is no way to segment the whole string into dictionary words."
+    }
+  ],
+  "constraints": [
+    "1 <= s.length <= 20",
+    "1 <= wordDict.length <= 1000",
+    "1 <= wordDict[i].length <= 10",
+    "s and wordDict[i] consist of only lowercase English letters.",
+    "All the strings of wordDict are unique.",
+    "Input is generated in a way that the length of the answer doesn't exceed 10^5."
+  ],
+  "functionName": "wordBreak",
+  "params": ["s", "wordDict"],
+  "judge": "unordered",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @param {string[]} wordDict\n * @return {string[]}\n */\nvar wordBreak = function(s, wordDict) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var wordBreak = function(s, wordDict) {\n    const words = new Set(wordDict);\n    let maxLength = 0;\n    for (const w of words) maxLength = Math.max(maxLength, w.length);\n    const memo = new Map();\n    function build(start) {\n        if (start === s.length) return [\"\"];\n        if (memo.has(start)) return memo.get(start);\n        const sentences = [];\n        const last = Math.min(s.length, start + maxLength);\n        for (let end = start + 1; end <= last; end++) {\n            const word = s.slice(start, end);\n            if (!words.has(word)) continue;\n            for (const suffix of build(end)) {\n                sentences.push(suffix ? word + \" \" + suffix : word);\n            }\n        }\n        memo.set(start, sentences);\n        return sentences;\n    }\n    return build(0);\n};",
+    "python": "from functools import lru_cache\nfrom typing import List\n\n\nclass Solution:\n    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:\n        words = set(wordDict)\n        max_length = max((len(word) for word in words), default=0)\n\n        @lru_cache(maxsize=None)\n        def build(start: int):\n            if start == len(s):\n                return (\"\",)\n\n            sentences = []\n            last = min(len(s), start + max_length)\n            for end in range(start + 1, last + 1):\n                word = s[start:end]\n                if word not in words:\n                    continue\n                for suffix in build(end):\n                    sentences.append(word if not suffix else word + \" \" + suffix)\n            return tuple(sentences)\n\n        return list(build(0))\n"
+  },
+  "approach": "Solve suffixes recursively: build(start) returns every sentence that segments s[start:]. For each index, try dictionary words that match a prefix s[start:end], then prepend that word to each sentence returned by build(end). Memoizing build by start shares the potentially exponential suffix result across different prefixes, and bounding end by the longest dictionary word length skips useless endpoints. The output itself can be exponential, so worst-case time is O(n * 2^n) including generated sentence strings.",
+  "complexity": { "time": "O(n * 2^n)", "space": "O(n * 2^n)" },
+  "tests": [
+    {
+      "args": ["catsanddog", ["cat", "cats", "and", "sand", "dog"]],
+      "expected": ["cats and dog", "cat sand dog"]
+    },
+    {
+      "args": ["pineapplepenapple", ["apple", "pen", "applepen", "pine", "pineapple"]],
+      "expected": ["pine apple pen apple", "pineapple pen apple", "pine applepen apple"]
+    },
+    {
+      "args": ["catsandog", ["cats", "dog", "sand", "and", "cat"]],
+      "expected": []
+    }
+  ]
+}

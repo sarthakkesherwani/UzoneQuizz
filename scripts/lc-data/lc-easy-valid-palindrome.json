@@ -1,0 +1,34 @@
+{
+  "id": "lc-easy-valid-palindrome",
+  "title": "Valid Palindrome",
+  "difficulty": "Easy",
+  "tags": ["Two Pointers", "String"],
+  "description": "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.\n\nGiven a string s, return true if it is a palindrome, or false otherwise.",
+  "examples": [
+    { "input": "s = \"A man, a plan, a canal: Panama\"", "output": "true", "explanation": "\"amanaplanacanalpanama\" is a palindrome." },
+    { "input": "s = \"race a car\"", "output": "false", "explanation": "\"raceacar\" is not a palindrome." },
+    { "input": "s = \" \"", "output": "true", "explanation": "After removing non-alphanumeric characters, s is an empty string \"\". An empty string reads the same forward and backward, so it is a palindrome." }
+  ],
+  "constraints": [
+    "1 <= s.length <= 2 * 10^5",
+    "s consists only of printable ASCII characters."
+  ],
+  "functionName": "isPalindrome",
+  "params": ["s"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @return {boolean}\n */\nvar isPalindrome = function(s) {\n    \n};",
+    "python": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var isPalindrome = function(s) {\n    const isAlnum = (c) => /[a-zA-Z0-9]/.test(c);\n    let left = 0, right = s.length - 1;\n    while (left < right) {\n        while (left < right && !isAlnum(s[left])) left++;\n        while (left < right && !isAlnum(s[right])) right--;\n        if (s[left].toLowerCase() !== s[right].toLowerCase()) return false;\n        left++;\n        right--;\n    }\n    return true;\n};",
+    "python": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        left, right = 0, len(s) - 1\n\n        while left < right:\n            while left < right and not s[left].isalnum():\n                left += 1\n            while left < right and not s[right].isalnum():\n                right -= 1\n\n            if s[left].lower() != s[right].lower():\n                return False\n            left += 1\n            right -= 1\n\n        return True"
+  },
+  "approach": "Place one pointer at each end. Advance either pointer past non-alphanumeric characters; when both point to relevant characters, compare their lowercase forms and move inward. Any mismatch proves the answer is false. Each pointer crosses the string at most once, so time is O(n). Only the two indices and temporary characters are stored, giving O(1) auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": ["A man, a plan, a canal: Panama"], "expected": true },
+    { "args": [" "], "expected": true },
+    { "args": ["0P"], "expected": false }
+  ]
+}

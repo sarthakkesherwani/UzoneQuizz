@@ -1,0 +1,36 @@
+{
+  "id": "lc-easy-linked-list-cycle",
+  "title": "Linked List Cycle",
+  "difficulty": "Easy",
+  "tags": ["Linked List", "Two Pointers", "Hash Table"],
+  "description": "Given head, the head of a singly linked list, determine if the linked list has a cycle in it.\n\nThere is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer. Internally, pos is used to denote the index of the node that the tail's next pointer is connected to (0-indexed); pos is -1 if there is no cycle. Note that pos is not passed as a parameter — it only describes how the input list is built.\n\nReturn true if there is a cycle in the linked list. Otherwise, return false. The list must not be modified.",
+  "examples": [
+    { "input": "head = [3,2,0,-4], pos = 1", "output": "true", "explanation": "There is a cycle in the linked list, where the tail connects to the 1st node (0-indexed)." },
+    { "input": "head = [1,2], pos = 0", "output": "true", "explanation": "There is a cycle in the linked list, where the tail connects to the 0th node." },
+    { "input": "head = [1], pos = -1", "output": "false", "explanation": "There is no cycle in the linked list." }
+  ],
+  "constraints": [
+    "The number of the nodes in the list is in the range [0, 10^4].",
+    "-10^5 <= Node.val <= 10^5",
+    "pos is -1 or a valid index in the linked-list."
+  ],
+  "functionName": "hasCycle",
+  "params": ["head"],
+  "judge": "exact",
+  "argStructures": { "head": "list_cycle" },
+  "starter": {
+    "javascript": "/**\n * @param {ListNode} head\n * @return {boolean}\n */\nvar hasCycle = function(head) {\n    \n};",
+    "python": "from typing import Optional\n\nclass Solution:\n    def hasCycle(self, head: Optional[\"ListNode\"]) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var hasCycle = function(head) {\n    let slow = head;\n    let fast = head;\n    while (fast !== null && fast.next !== null) {\n        slow = slow.next;\n        fast = fast.next.next;\n        if (slow === fast) return true;\n    }\n    return false;\n};",
+    "python": "from typing import Optional\n\n# ListNode is supplied by the LeetCode judge.\nclass Solution:\n    def hasCycle(self, head: Optional[\"ListNode\"]) -> bool:\n        slow = fast = head\n\n        while fast is not None and fast.next is not None:\n            slow = slow.next\n            fast = fast.next.next\n            if slow is fast:\n                return True\n\n        return False"
+  },
+  "approach": "Floyd's tortoise-and-hare method advances a slow pointer by one link and a fast pointer by two. In an acyclic list, fast reaches the end (null). Inside a cycle, the faster pointer gains on the slower pointer modulo the cycle length and must eventually meet it. The method takes O(n) time and uses only two pointers, so auxiliary space is O(1).",
+  "complexity": { "time": "O(n)", "space": "O(1)" },
+  "tests": [
+    { "args": [{ "values": [3, 2, 0, -4], "pos": 1 }], "expected": true },
+    { "args": [{ "values": [1], "pos": -1 }], "expected": false },
+    { "args": [{ "values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "pos": 0 }], "expected": true }
+  ]
+}

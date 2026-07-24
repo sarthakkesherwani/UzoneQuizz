@@ -1,0 +1,34 @@
+{
+  "id": "lc-hard-serialize-binary-tree",
+  "title": "Serialize and Deserialize Binary Tree",
+  "difficulty": "Hard",
+  "tags": ["Tree", "Depth-First Search", "Breadth-First Search", "Design", "Binary Tree", "String"],
+  "description": "Serialization is the process of converting a data structure into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.\n\nDesign an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.\n\nValues may be negative, and missing children must remain distinguishable so the exact shape is recovered.",
+  "examples": [
+    { "input": "root = [1,2,3,null,null,4,5]", "output": "[1,2,3,null,null,4,5]", "explanation": "The tree is serialized to a string and deserialized back to the identical structure and values." },
+    { "input": "root = []", "output": "[]", "explanation": "An empty tree round-trips to an empty tree." },
+    { "input": "root = [1,2]", "output": "[1,2]", "explanation": "A single left child is preserved distinctly from a right child." }
+  ],
+  "constraints": [
+    "The number of nodes in the tree is in the range [0, 10^4].",
+    "-1000 <= Node.val <= 1000"
+  ],
+  "functionName": "Codec",
+  "params": ["root"],
+  "judge": "tree_roundtrip",
+  "starter": {
+    "javascript": "/**\n * Encodes a tree to a single string.\n *\n * @param {TreeNode} root\n * @return {string}\n */\nvar serialize = function(root) {\n    \n};\n\n/**\n * Decodes your encoded data to tree.\n *\n * @param {string} data\n * @return {TreeNode}\n */\nvar deserialize = function(data) {\n    \n};",
+    "python": "from typing import Optional\n\nclass Codec:\n    def serialize(self, root: Optional[\"TreeNode\"]) -> str:\n        pass\n\n    def deserialize(self, data: str) -> Optional[\"TreeNode\"]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var serialize = function(root) {\n    const tokens = [];\n    function visit(node) {\n        if (node === null) {\n            tokens.push('#');\n            return;\n        }\n        tokens.push(String(node.val));\n        visit(node.left);\n        visit(node.right);\n    }\n    visit(root);\n    return tokens.join(',');\n};\n\nvar deserialize = function(data) {\n    const values = data.split(',');\n    let index = 0;\n    function build() {\n        const value = values[index++];\n        if (value === '#') return null;\n        const node = new TreeNode(parseInt(value, 10));\n        node.left = build();\n        node.right = build();\n        return node;\n    }\n    return build();\n};",
+    "python": "from typing import Optional\n\nclass Codec:\n    def serialize(self, root: Optional[\"TreeNode\"]) -> str:\n        tokens = []\n\n        def visit(node: Optional[\"TreeNode\"]) -> None:\n            if node is None:\n                tokens.append('#')\n                return\n            tokens.append(str(node.val))\n            visit(node.left)\n            visit(node.right)\n\n        visit(root)\n        return ','.join(tokens)\n\n    def deserialize(self, data: str) -> Optional[\"TreeNode\"]:\n        values = iter(data.split(','))\n\n        def build() -> Optional[\"TreeNode\"]:\n            value = next(values)\n            if value == '#':\n                return None\n            node = TreeNode(int(value))\n            node.left = build()\n            node.right = build()\n            return node\n\n        return build()"
+  },
+  "approach": "Serialize with a preorder DFS: emit each node's value before recursing into its subtrees, and emit a sentinel marker ('#') for every missing child so the exact shape is preserved. Deserialize by consuming the tokens in the same preorder order: a marker terminates a branch and returns null, otherwise create the node and recursively build its left then right subtrees. Preorder guarantees each real node is identified before its children, making reconstruction unambiguous. Both directions visit every real and null position once, so time is O(n); the encoded string plus the recursion stack use O(n) space in the worst case.",
+  "complexity": { "time": "O(n)", "space": "O(n)" },
+  "tests": [
+    { "args": [[1, 2, 3, null, null, 4, 5]], "expected": [1, 2, 3, null, null, 4, 5] },
+    { "args": [[]], "expected": [] },
+    { "args": [[-10, -3, 7, -50, null, null, 12]], "expected": [-10, -3, 7, -50, null, null, 12] }
+  ]
+}

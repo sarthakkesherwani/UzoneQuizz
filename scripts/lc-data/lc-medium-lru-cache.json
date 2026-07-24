@@ -1,0 +1,56 @@
+{
+  "id": "lc-medium-lru-cache",
+  "title": "LRU Cache",
+  "difficulty": "Medium",
+  "tags": ["Hash Table", "Linked List", "Design", "Doubly-Linked List"],
+  "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.\n\nImplement the LRUCache class:\n\nLRUCache(int capacity) initializes the LRU cache with positive size capacity.\n\nint get(int key) returns the value of the key if the key exists, otherwise returns -1.\n\nvoid put(int key, int value) updates the value of the key if the key exists. Otherwise, adds the key-value pair to the cache. If the number of keys exceeds the capacity from this operation, evict the least recently used key.\n\nBoth get and put must run in average O(1) time complexity.",
+  "examples": [
+    {
+      "input": "[\"LRUCache\",\"put\",\"put\",\"get\",\"put\",\"get\",\"put\",\"get\",\"get\",\"get\"]\n[[2],[1,1],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]",
+      "output": "[null,null,null,1,null,-1,null,-1,3,4]",
+      "explanation": "After put(1,1) and put(2,2) the cache is {1=1, 2=2}. get(1) returns 1 and marks key 1 most recent. put(3,3) evicts key 2 (least recently used), so get(2) returns -1. put(4,4) evicts key 1, so get(1) returns -1, get(3) returns 3, get(4) returns 4."
+    }
+  ],
+  "constraints": [
+    "1 <= capacity <= 3000",
+    "0 <= key <= 10^4",
+    "0 <= value <= 10^5",
+    "At most 2 * 10^5 calls will be made to get and put."
+  ],
+  "functionName": "LRUCache",
+  "params": [],
+  "judge": "design",
+  "starter": {
+    "javascript": "/**\n * @param {number} capacity\n */\nvar LRUCache = function(capacity) {\n    \n};\n\n/**\n * @param {number} key\n * @return {number}\n */\nLRUCache.prototype.get = function(key) {\n    \n};\n\n/**\n * @param {number} key\n * @param {number} value\n * @return {void}\n */\nLRUCache.prototype.put = function(key, value) {\n    \n};",
+    "python": "class LRUCache:\n    def __init__(self, capacity: int):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass"
+  },
+  "solution": {
+    "javascript": "class _Node {\n    constructor(key = 0, value = 0) {\n        this.key = key;\n        this.value = value;\n        this.prev = null;\n        this.next = null;\n    }\n}\n\nclass LRUCache {\n    constructor(capacity) {\n        this.capacity = capacity;\n        this.nodes = new Map();\n        this.least = new _Node();\n        this.most = new _Node();\n        this.least.next = this.most;\n        this.most.prev = this.least;\n    }\n\n    _remove(node) {\n        node.prev.next = node.next;\n        node.next.prev = node.prev;\n    }\n\n    _appendMostRecent(node) {\n        const previous = this.most.prev;\n        previous.next = node;\n        node.prev = previous;\n        node.next = this.most;\n        this.most.prev = node;\n    }\n\n    get(key) {\n        if (!this.nodes.has(key)) return -1;\n        const node = this.nodes.get(key);\n        this._remove(node);\n        this._appendMostRecent(node);\n        return node.value;\n    }\n\n    put(key, value) {\n        if (this.nodes.has(key)) {\n            const node = this.nodes.get(key);\n            node.value = value;\n            this._remove(node);\n            this._appendMostRecent(node);\n            return;\n        }\n        const node = new _Node(key, value);\n        this.nodes.set(key, node);\n        this._appendMostRecent(node);\n        if (this.nodes.size > this.capacity) {\n            const lru = this.least.next;\n            this._remove(lru);\n            this.nodes.delete(lru.key);\n        }\n    }\n}",
+    "python": "class _Node:\n    __slots__ = (\"key\", \"value\", \"prev\", \"next\")\n\n    def __init__(self, key=0, value=0):\n        self.key = key\n        self.value = value\n        self.prev = None\n        self.next = None\n\n\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.nodes = {}\n        self.least = _Node()\n        self.most = _Node()\n        self.least.next = self.most\n        self.most.prev = self.least\n\n    def _remove(self, node: _Node) -> None:\n        node.prev.next = node.next\n        node.next.prev = node.prev\n\n    def _append_most_recent(self, node: _Node) -> None:\n        previous = self.most.prev\n        previous.next = node\n        node.prev = previous\n        node.next = self.most\n        self.most.prev = node\n\n    def get(self, key: int) -> int:\n        if key not in self.nodes:\n            return -1\n\n        node = self.nodes[key]\n        self._remove(node)\n        self._append_most_recent(node)\n        return node.value\n\n    def put(self, key: int, value: int) -> None:\n        if key in self.nodes:\n            node = self.nodes[key]\n            node.value = value\n            self._remove(node)\n            self._append_most_recent(node)\n            return\n\n        node = _Node(key, value)\n        self.nodes[key] = node\n        self._append_most_recent(node)\n\n        if len(self.nodes) > self.capacity:\n            lru = self.least.next\n            self._remove(lru)\n            del self.nodes[lru.key]"
+  },
+  "approach": "Combine a hash map with a doubly linked list. The hash map locates a key's node in average O(1) time, while the doubly linked list keeps nodes ordered from least to most recently used. Sentinel head/tail nodes remove edge cases when detaching or appending. On get or an updating put, unlink the node and re-append it beside the most-recent sentinel. When an insertion exceeds capacity, drop the node next to the least-recent sentinel and delete its map entry. Both operations touch a constant number of pointers, giving average O(1) time.",
+  "complexity": { "time": "O(1) average per operation", "space": "O(capacity)" },
+  "tests": [
+    {
+      "args": [
+        ["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"],
+        [[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+      ],
+      "expected": [null, null, null, 1, null, -1, null, -1, 3, 4]
+    },
+    {
+      "args": [
+        ["LRUCache", "put", "get", "put", "get", "get"],
+        [[1], [2, 1], [2], [3, 2], [2], [3]]
+      ],
+      "expected": [null, null, 1, null, -1, 2]
+    },
+    {
+      "args": [
+        ["LRUCache", "get", "put", "put", "get", "get"],
+        [[2], [2], [1, 1], [1, 2], [1], [2]]
+      ],
+      "expected": [null, -1, null, null, 2, -1]
+    }
+  ]
+}

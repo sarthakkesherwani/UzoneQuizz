@@ -1,0 +1,35 @@
+{
+  "id": "lc-hard-split-array-largest-sum",
+  "title": "Split Array Largest Sum",
+  "difficulty": "Hard",
+  "tags": ["Array", "Binary Search", "Dynamic Programming", "Greedy"],
+  "description": "Given an integer array nums and an integer k, split nums into k non-empty contiguous subarrays.\n\nWrite an algorithm to minimize the largest sum among these k subarrays.\n\nReturn the minimized largest sum of the split.",
+  "examples": [
+    { "input": "nums = [7,2,5,10,8], k = 2", "output": "18", "explanation": "There are four ways to split nums into two subarrays. The best way is to split it into [7,2,5] and [10,8], where the largest sum among the two subarrays is only 18." },
+    { "input": "nums = [1,2,3,4,5], k = 2", "output": "9", "explanation": "The best split is [1,2,3,4] and [5], giving a largest sum of 10, or [1,2,3] and [4,5] giving 9." },
+    { "input": "nums = [1,4,4], k = 3", "output": "4", "explanation": "Each element becomes its own subarray, so the largest sum is 4." }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 1000",
+    "0 <= nums[i] <= 10^6",
+    "1 <= k <= min(50, nums.length)"
+  ],
+  "functionName": "splitArray",
+  "params": ["nums", "k"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number}\n */\nvar splitArray = function(nums, k) {\n    \n};",
+    "python": "class Solution:\n    def splitArray(self, nums: List[int], k: int) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var splitArray = function(nums, k) {\n    let low = Math.max(...nums);\n    let high = nums.reduce((a, b) => a + b, 0);\n\n    const partsNeeded = (limit) => {\n        let parts = 1, current = 0;\n        for (const value of nums) {\n            if (current + value > limit) {\n                parts += 1;\n                current = value;\n            } else {\n                current += value;\n            }\n        }\n        return parts;\n    };\n\n    while (low < high) {\n        const middle = Math.floor((low + high) / 2);\n        if (partsNeeded(middle) <= k) {\n            high = middle;\n        } else {\n            low = middle + 1;\n        }\n    }\n\n    return low;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def splitArray(self, nums: List[int], k: int) -> int:\n        low, high = max(nums), sum(nums)\n\n        def parts_needed(limit: int) -> int:\n            parts = 1\n            current = 0\n            for value in nums:\n                if current + value > limit:\n                    parts += 1\n                    current = value\n                else:\n                    current += value\n            return parts\n\n        while low < high:\n            middle = (low + high) // 2\n            if parts_needed(middle) <= k:\n                high = middle\n            else:\n                low = middle + 1\n\n        return low"
+  },
+  "approach": "Binary search on the answer. Any candidate largest-sum limit between max(nums) and sum(nums) is feasible if a greedy left-to-right pass can cover nums using at most k parts: extend the current part until adding the next value would exceed the limit, then start a new part. Feasibility is monotone in the limit, so binary search converges on the smallest feasible limit. Time is O(n log(sum(nums)-max(nums))) and auxiliary space is O(1).",
+  "complexity": { "time": "O(n log(sum(nums)))", "space": "O(1)" },
+  "tests": [
+    { "args": [[7, 2, 5, 10, 8], 2], "expected": 18 },
+    { "args": [[1, 2, 3, 4, 5], 2], "expected": 9 },
+    { "args": [[1, 4, 4], 3], "expected": 4 }
+  ]
+}

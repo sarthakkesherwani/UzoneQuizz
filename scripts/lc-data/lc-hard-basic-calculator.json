@@ -1,0 +1,39 @@
+{
+  "id": "lc-hard-basic-calculator",
+  "title": "Basic Calculator",
+  "difficulty": "Hard",
+  "tags": ["String", "Stack", "Math"],
+  "description": "Given a string s representing a valid expression, implement a basic calculator to evaluate it and return the result of the evaluation.\n\nThe expression contains nonnegative integers, the '+' and '-' operators, spaces, and parentheses '(' and ')'. Precedence is determined only by parentheses, and unary signs may appear where valid.\n\nYou are not allowed to use any built-in function which evaluates strings as mathematical expressions, such as eval().",
+  "examples": [
+    { "input": "s = \"1 + 1\"", "output": "2" },
+    { "input": "s = \" 2-1 + 2 \"", "output": "3" },
+    { "input": "s = \"(1+(4+5+2)-3)+(6+8)\"", "output": "23" }
+  ],
+  "constraints": [
+    "1 <= s.length <= 3 * 10^5",
+    "s consists of digits, '+', '-', '(', ')', and ' '.",
+    "s represents a valid expression.",
+    "'+' is not used as a unary operation (i.e., \"+1\" and \"+(2 + 3)\" is invalid).",
+    "'-' could be used as a unary operation (i.e., \"-1\" and \"-(2 + 3)\" is valid).",
+    "There will be no two consecutive operators in the input.",
+    "Every number and running calculation will fit in a signed 32-bit integer."
+  ],
+  "functionName": "calculate",
+  "params": ["s"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar calculate = function(s) {\n    \n};",
+    "python": "class Solution:\n    def calculate(self, s: str) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var calculate = function(s) {\n    let result = 0;\n    let number = 0;\n    let sign = 1;\n    const stack = [];\n\n    for (const ch of s) {\n        if (ch >= '0' && ch <= '9') {\n            number = number * 10 + (ch.charCodeAt(0) - 48);\n        } else if (ch === '+' || ch === '-') {\n            result += sign * number;\n            number = 0;\n            sign = ch === '+' ? 1 : -1;\n        } else if (ch === '(') {\n            stack.push(result);\n            stack.push(sign);\n            result = 0;\n            sign = 1;\n        } else if (ch === ')') {\n            result += sign * number;\n            number = 0;\n            const outerSign = stack.pop();\n            const outerResult = stack.pop();\n            result = outerResult + outerSign * result;\n        }\n    }\n\n    return result + sign * number;\n};",
+    "python": "class Solution:\n    def calculate(self, s: str) -> int:\n        result = 0\n        number = 0\n        sign = 1\n        stack = []\n\n        for ch in s:\n            if ch.isdigit():\n                number = number * 10 + int(ch)\n            elif ch == '+' or ch == '-':\n                result += sign * number\n                number = 0\n                sign = 1 if ch == '+' else -1\n            elif ch == '(':\n                stack.append(result)\n                stack.append(sign)\n                result = 0\n                sign = 1\n            elif ch == ')':\n                result += sign * number\n                number = 0\n                outer_sign = stack.pop()\n                outer_result = stack.pop()\n                result = outer_result + outer_sign * result\n\n        return result + sign * number"
+  },
+  "approach": "Scan the string once while maintaining a running result, the number being built, and the current sign. Digits accumulate into number; a '+' or '-' commits the pending number with its sign and sets the next sign. On '(', push the current result and sign, then reset to evaluate the inner group from scratch; on ')', commit the pending number, pop the saved sign and result, and fold the group's value back in. This handles arbitrarily nested parentheses in O(n) time without evaluating arbitrary code.",
+  "complexity": { "time": "O(n)", "space": "O(n)" },
+  "tests": [
+    { "args": ["1 + 1"], "expected": 2 },
+    { "args": [" 2-1 + 2 "], "expected": 3 },
+    { "args": ["(1+(4+5+2)-3)+(6+8)"], "expected": 23 }
+  ]
+}

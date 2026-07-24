@@ -1,0 +1,52 @@
+{
+  "id": "lc-medium-number-of-islands",
+  "title": "Number of Islands",
+  "difficulty": "Medium",
+  "tags": ["Array", "Depth-First Search", "Breadth-First Search", "Union Find", "Matrix"],
+  "description": "Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands.\n\nAn island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.",
+  "examples": [
+    {
+      "input": "grid = [[\"1\",\"1\",\"1\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"0\",\"0\"]]",
+      "output": "1",
+      "explanation": "All the land cells are connected horizontally or vertically, so they form a single island."
+    },
+    {
+      "input": "grid = [[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"1\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"1\",\"1\"]]",
+      "output": "3",
+      "explanation": "There are three separate groups of land cells; diagonal touching does not connect land."
+    }
+  ],
+  "constraints": [
+    "m == grid.length",
+    "n == grid[i].length",
+    "1 <= m, n <= 300",
+    "grid[i][j] is '0' or '1'."
+  ],
+  "functionName": "numIslands",
+  "params": ["grid"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {character[][]} grid\n * @return {number}\n */\nvar numIslands = function(grid) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var numIslands = function(grid) {\n    if (!grid || !grid.length || !grid[0].length) return 0;\n    const rows = grid.length;\n    const cols = grid[0].length;\n    let islands = 0;\n    for (let row = 0; row < rows; row++) {\n        for (let col = 0; col < cols; col++) {\n            if (grid[row][col] !== '1') continue;\n            islands++;\n            grid[row][col] = '0';\n            const stack = [[row, col]];\n            while (stack.length) {\n                const [currentRow, currentCol] = stack.pop();\n                for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {\n                    const nextRow = currentRow + dr;\n                    const nextCol = currentCol + dc;\n                    if (nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols && grid[nextRow][nextCol] === '1') {\n                        grid[nextRow][nextCol] = '0';\n                        stack.push([nextRow, nextCol]);\n                    }\n                }\n            }\n        }\n    }\n    return islands;\n};",
+    "python": "from typing import List\n\n\nclass Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        if not grid or not grid[0]:\n            return 0\n\n        rows, cols = len(grid), len(grid[0])\n        islands = 0\n\n        for row in range(rows):\n            for col in range(cols):\n                if grid[row][col] != \"1\":\n                    continue\n\n                islands += 1\n                grid[row][col] = \"0\"\n                stack = [(row, col)]\n\n                while stack:\n                    current_row, current_col = stack.pop()\n                    for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                        next_row = current_row + dr\n                        next_col = current_col + dc\n                        if (\n                            0 <= next_row < rows\n                            and 0 <= next_col < cols\n                            and grid[next_row][next_col] == \"1\"\n                        ):\n                            grid[next_row][next_col] = \"0\"\n                            stack.append((next_row, next_col))\n\n        return islands"
+  },
+  "approach": "Scan the grid cell by cell. Each time the scan encounters unvisited land, it has found a new island: increment the count and perform DFS or BFS (flood fill), changing all orthogonally connected land cells to water so none is counted again. Every cell is inspected a constant number of times. For R rows and C columns, time complexity is O(R * C). Space complexity is O(R * C) in the worst case for the explicit flood-fill stack; mutating the grid avoids a separate visited matrix.",
+  "complexity": { "time": "O(m * n)", "space": "O(m * n)" },
+  "tests": [
+    {
+      "args": [[["1", "1", "1", "1", "0"], ["1", "1", "0", "1", "0"], ["1", "1", "0", "0", "0"], ["0", "0", "0", "0", "0"]]],
+      "expected": 1
+    },
+    {
+      "args": [[["0", "0", "0"], ["0", "0", "0"]]],
+      "expected": 0
+    },
+    {
+      "args": [[["1", "0", "1", "0", "1"], ["0", "1", "0", "1", "0"], ["1", "0", "1", "0", "1"]]],
+      "expected": 8
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "lc-medium-add-two-numbers",
+  "title": "Add Two Numbers",
+  "difficulty": "Medium",
+  "tags": ["Linked List", "Math", "Recursion"],
+  "description": "You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.\n\nYou may assume the two numbers do not contain any leading zero, except the number 0 itself.",
+  "examples": [
+    { "input": "l1 = [2,4,3], l2 = [5,6,4]", "output": "[7,0,8]", "explanation": "342 + 465 = 807." },
+    { "input": "l1 = [0], l2 = [0]", "output": "[0]" },
+    { "input": "l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]", "output": "[8,9,9,9,0,0,0,1]", "explanation": "9999999 + 9999 = 10009998." }
+  ],
+  "constraints": [
+    "The number of nodes in each linked list is in the range [1, 100].",
+    "0 <= Node.val <= 9",
+    "It is guaranteed that the list represents a number that does not have leading zeros."
+  ],
+  "functionName": "addTwoNumbers",
+  "params": ["l1", "l2"],
+  "judge": "exact",
+  "argStructures": { "l1": "list", "l2": "list" },
+  "resultStructure": "list",
+  "starter": {
+    "javascript": "/**\n * Definition for singly-linked list:\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} l1\n * @param {ListNode} l2\n * @return {ListNode}\n */\nvar addTwoNumbers = function(l1, l2) {\n    \n};",
+    "python": "from typing import Optional\n\n# ListNode is supplied by the judge:\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\n\nclass Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var addTwoNumbers = function(l1, l2) {\n    const dummy = new ListNode();\n    let tail = dummy;\n    let carry = 0;\n\n    while (l1 !== null || l2 !== null || carry) {\n        const x = l1 !== null ? l1.val : 0;\n        const y = l2 !== null ? l2.val : 0;\n        const total = x + y + carry;\n        carry = Math.floor(total / 10);\n\n        tail.next = new ListNode(total % 10);\n        tail = tail.next;\n\n        if (l1 !== null) l1 = l1.next;\n        if (l2 !== null) l2 = l2.next;\n    }\n\n    return dummy.next;\n};",
+    "python": "from typing import Optional\n\nclass Solution:\n    def addTwoNumbers(\n        self, l1: Optional[ListNode], l2: Optional[ListNode]\n    ) -> Optional[ListNode]:\n        dummy = ListNode()\n        tail = dummy\n        carry = 0\n\n        while l1 is not None or l2 is not None or carry:\n            x = l1.val if l1 is not None else 0\n            y = l2.val if l2 is not None else 0\n            total = x + y + carry\n            carry, digit = divmod(total, 10)\n\n            tail.next = ListNode(digit)\n            tail = tail.next\n\n            if l1 is not None:\n                l1 = l1.next\n            if l2 is not None:\n                l2 = l2.next\n\n        return dummy.next"
+  },
+  "approach": "Process the lists exactly as grade-school addition works. At each step, read a digit from each list when present, add the incoming carry, append total % 10, and retain total // 10 as the new carry. Continue while either list or the carry remains, so unequal lengths and a final carry need no special pass. Time complexity is O(max(m, n)), where m and n are the list lengths. Auxiliary space complexity is O(1), excluding the O(max(m, n)) nodes required for the returned list.",
+  "complexity": { "time": "O(max(m, n))", "space": "O(1)" },
+  "tests": [
+    { "args": [[2, 4, 3], [5, 6, 4]], "expected": [7, 0, 8] },
+    { "args": [[0], [0]], "expected": [0] },
+    { "args": [[9, 9, 9, 9, 9, 9, 9], [9, 9, 9, 9]], "expected": [8, 9, 9, 9, 0, 0, 0, 1] }
+  ]
+}

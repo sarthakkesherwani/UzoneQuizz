@@ -1,0 +1,34 @@
+{
+  "id": "lc-hard-palindrome-partitioning-ii",
+  "title": "Palindrome Partitioning II",
+  "difficulty": "Hard",
+  "tags": ["String", "Dynamic Programming"],
+  "description": "Given a string s, partition s such that every substring of the partition is a palindrome.\n\nReturn the minimum number of cuts needed for a palindrome partitioning of s.\n\nA string that is already a palindrome requires zero cuts.",
+  "examples": [
+    { "input": "s = \"aab\"", "output": "1", "explanation": "The palindrome partitioning [\"aa\", \"b\"] could be produced using 1 cut." },
+    { "input": "s = \"a\"", "output": "0", "explanation": "A single character is already a palindrome, so no cuts are needed." },
+    { "input": "s = \"ab\"", "output": "1", "explanation": "One cut splits \"ab\" into the palindromes \"a\" and \"b\"." }
+  ],
+  "constraints": [
+    "1 <= s.length <= 2000",
+    "s consists of lowercase English letters only."
+  ],
+  "functionName": "minCut",
+  "params": ["s"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar minCut = function(s) {\n    \n};",
+    "python": "class Solution:\n    def minCut(self, s: str) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var minCut = function(s) {\n    const n = s.length;\n    if (n === 0) return 0;\n\n    const cuts = new Array(n + 1);\n    for (let length = 0; length <= n; length++) cuts[length] = length - 1;\n\n    for (let center = 0; center < n; center++) {\n        let left = center, right = center;\n        while (left >= 0 && right < n && s[left] === s[right]) {\n            cuts[right + 1] = Math.min(cuts[right + 1], cuts[left] + 1);\n            left--;\n            right++;\n        }\n\n        left = center - 1;\n        right = center;\n        while (left >= 0 && right < n && s[left] === s[right]) {\n            cuts[right + 1] = Math.min(cuts[right + 1], cuts[left] + 1);\n            left--;\n            right++;\n        }\n    }\n\n    return cuts[n];\n};",
+    "python": "class Solution:\n    def minCut(self, s: str) -> int:\n        n = len(s)\n        if n == 0:\n            return 0\n\n        cuts = [length - 1 for length in range(n + 1)]\n\n        for center in range(n):\n            left = right = center\n            while left >= 0 and right < n and s[left] == s[right]:\n                cuts[right + 1] = min(cuts[right + 1], cuts[left] + 1)\n                left -= 1\n                right += 1\n\n            left, right = center - 1, center\n            while left >= 0 and right < n and s[left] == s[right]:\n                cuts[right + 1] = min(cuts[right + 1], cuts[left] + 1)\n                left -= 1\n                right += 1\n\n        return cuts[n]\n"
+  },
+  "approach": "Let cuts[k] be the minimum cuts needed for the prefix of length k, initialized to k-1 (the worst case of cutting every character), so cuts[0] = -1. Expand around every possible palindrome center (both odd-length single centers and even-length gaps). Each palindrome s[left..right] means the prefix ending at right+1 can be formed from the prefix ending at left plus one more piece, so cuts[right+1] = min(cuts[right+1], cuts[left] + 1). Expanding around centers enumerates all palindromic substrings without building a quadratic table. There are O(n^2) expansions, so time is O(n^2) and the cuts array uses O(n) space.",
+  "complexity": { "time": "O(n^2)", "space": "O(n)" },
+  "tests": [
+    { "args": ["aab"], "expected": 1 },
+    { "args": ["abccbc"], "expected": 2 },
+    { "args": ["cabababcbc"], "expected": 3 }
+  ]
+}

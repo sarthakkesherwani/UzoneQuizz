@@ -1,0 +1,34 @@
+{
+  "id": "lc-easy-contains-duplicate",
+  "title": "Contains Duplicate",
+  "difficulty": "Easy",
+  "tags": ["Array", "Hash Table", "Sorting"],
+  "description": "Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.",
+  "examples": [
+    { "input": "nums = [1,2,3,1]", "output": "true", "explanation": "The value 1 appears at indices 0 and 3." },
+    { "input": "nums = [1,2,3,4]", "output": "false", "explanation": "All elements are distinct." },
+    { "input": "nums = [1,1,1,3,3,4,3,2,4,2]", "output": "true" }
+  ],
+  "constraints": [
+    "1 <= nums.length <= 10^5",
+    "-10^9 <= nums[i] <= 10^9"
+  ],
+  "functionName": "containsDuplicate",
+  "params": ["nums"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} nums\n * @return {boolean}\n */\nvar containsDuplicate = function(nums) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def containsDuplicate(self, nums: List[int]) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var containsDuplicate = function(nums) {\n    const seen = new Set();\n    for (const value of nums) {\n        if (seen.has(value)) return true;\n        seen.add(value);\n    }\n    return false;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def containsDuplicate(self, nums: List[int]) -> bool:\n        seen = set()\n        for value in nums:\n            if value in seen:\n                return True\n            seen.add(value)\n        return False"
+  },
+  "approach": "Maintain a set of values already encountered. If the current value is in the set, a duplicate has been found; otherwise insert it and continue. Hash-set membership and insertion are O(1) expected time, making the full scan O(n) expected time. If all values are distinct, the set contains n entries, so auxiliary space is O(n).",
+  "complexity": { "time": "O(n)", "space": "O(n)" },
+  "tests": [
+    { "args": [[1, 2, 3, 1]], "expected": true },
+    { "args": [[1]], "expected": false },
+    { "args": [[1, 1, 1, 3, 3, 4, 3, 2, 4, 2]], "expected": true }
+  ]
+}

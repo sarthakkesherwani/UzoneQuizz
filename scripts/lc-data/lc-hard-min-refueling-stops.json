@@ -1,0 +1,36 @@
+{
+  "id": "lc-hard-min-refueling-stops",
+  "title": "Minimum Number of Refueling Stops",
+  "difficulty": "Hard",
+  "tags": ["Array", "Greedy", "Heap (Priority Queue)", "Dynamic Programming"],
+  "description": "A car travels from position 0 to a destination that is target miles east along a one-dimensional road. It starts with startFuel liters of fuel and uses one liter per mile driven.\n\nAlong the way there are gas stations. stations[i] = [position_i, fuel_i] means the i-th station is position_i miles east of the start and has fuel_i liters of fuel available. All station positions are strictly less than target.\n\nThe car begins with an infinite fuel tank capacity, so it can store any amount of fuel. When the car reaches a station it may stop and transfer all of that station's fuel into the tank. It cannot go back.\n\nReturn the minimum number of refueling stops the car must make to reach the destination. If it cannot reach the destination for any number of stops, return -1. Note that if the car reaches a station with 0 fuel left, it can still refuel there; and if it arrives at the destination with 0 fuel left, it is still considered to have arrived.",
+  "examples": [
+    { "input": "target = 1, startFuel = 1, stations = []", "output": "0", "explanation": "The car can reach the target without refueling." },
+    { "input": "target = 100, startFuel = 1, stations = [[10,100]]", "output": "-1", "explanation": "The car cannot even reach the first station at position 10." },
+    { "input": "target = 100, startFuel = 10, stations = [[10,60],[20,30],[30,30],[60,40]]", "output": "2", "explanation": "Start with 10 fuel to reach position 10. Refuel from 0 to 60 fuel (total driven capacity now covers to 70). At position 60 refuel from 10 to 50. Drive to the target. Two refueling stops in total." }
+  ],
+  "constraints": [
+    "1 <= target, startFuel <= 10^9",
+    "0 <= stations.length <= 500",
+    "1 <= position_i < position_{i+1} < target",
+    "1 <= fuel_i < 10^9"
+  ],
+  "functionName": "minRefuelStops",
+  "params": ["target", "startFuel", "stations"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number} target\n * @param {number} startFuel\n * @param {number[][]} stations\n * @return {number}\n */\nvar minRefuelStops = function(target, startFuel, stations) {\n    \n};",
+    "python": "class Solution:\n    def minRefuelStops(self, target: int, startFuel: int, stations: List[List[int]]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var minRefuelStops = function(target, startFuel, stations) {\n    const ordered = stations.slice().sort((a, b) => a[0] - b[0]);\n    const heap = [];\n    const push = (x) => {\n        heap.push(x);\n        let i = heap.length - 1;\n        while (i > 0) {\n            const p = (i - 1) >> 1;\n            if (heap[p] >= heap[i]) break;\n            [heap[p], heap[i]] = [heap[i], heap[p]];\n            i = p;\n        }\n    };\n    const pop = () => {\n        const top = heap[0];\n        const last = heap.pop();\n        if (heap.length) {\n            heap[0] = last;\n            let i = 0;\n            const n = heap.length;\n            while (true) {\n                let l = 2 * i + 1, r = 2 * i + 2, big = i;\n                if (l < n && heap[l] > heap[big]) big = l;\n                if (r < n && heap[r] > heap[big]) big = r;\n                if (big === i) break;\n                [heap[big], heap[i]] = [heap[i], heap[big]];\n                i = big;\n            }\n        }\n        return top;\n    };\n\n    let reach = startFuel;\n    let idx = 0;\n    let stops = 0;\n\n    while (reach < target) {\n        while (idx < ordered.length && ordered[idx][0] <= reach) {\n            push(ordered[idx][1]);\n            idx++;\n        }\n        if (heap.length === 0) return -1;\n        reach += pop();\n        stops++;\n    }\n    return stops;\n};",
+    "python": "import heapq\nfrom typing import List\n\nclass Solution:\n    def minRefuelStops(self, target: int, startFuel: int,\n                       stations: List[List[int]]) -> int:\n        ordered = sorted(stations)\n        available = []  # negative fuel amounts form a max-heap\n        reach = startFuel\n        station_index = 0\n        stops = 0\n\n        while reach < target:\n            while station_index < len(ordered) and ordered[station_index][0] <= reach:\n                heapq.heappush(available, -ordered[station_index][1])\n                station_index += 1\n\n            if not available:\n                return -1\n\n            reach += -heapq.heappop(available)\n            stops += 1\n\n        return stops"
+  },
+  "approach": "Sweep stations from nearest to farthest, keeping a max-heap of the fuel amounts of every station already passed but not yet used. Track the farthest distance currently reachable, starting at startFuel. Whenever the destination is not yet reachable, greedily consume the largest available station fuel from the heap, since taking the biggest single top-up extends reach at least as far as any other choice and therefore never inflates the stop count. If the heap is empty and the target is still out of range, the trip is impossible, so return -1. Each station is pushed and popped at most once. Sorting dominates at O(n log n) time and the heap plus sorted copy use O(n) space.",
+  "complexity": { "time": "O(n log n)", "space": "O(n)" },
+  "tests": [
+    { "args": [1, 1, []], "expected": 0 },
+    { "args": [100, 1, [[10, 100]]], "expected": -1 },
+    { "args": [100, 10, [[10, 60], [20, 30], [30, 30], [60, 40]]], "expected": 2 }
+  ]
+}

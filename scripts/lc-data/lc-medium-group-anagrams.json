@@ -1,0 +1,45 @@
+{
+  "id": "lc-medium-group-anagrams",
+  "title": "Group Anagrams",
+  "difficulty": "Medium",
+  "tags": ["Array", "Hash Table", "String", "Sorting"],
+  "description": "Given an array of strings strs, group the anagrams together. You can return the answer in any order.\n\nAn anagram is a word or phrase formed by rearranging the letters of a different word or phrase, using all the original letters exactly once. In other words, two strings are anagrams if and only if they contain the same characters with the same frequencies.",
+  "examples": [
+    {
+      "input": "strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]",
+      "output": "[[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]",
+      "explanation": "\"tea\", \"eat\", and \"ate\" all use the letters a, e, t once each, so they form one group. \"tan\" and \"nat\" form another group, and \"bat\" is alone in its group."
+    },
+    {
+      "input": "strs = [\"\"]",
+      "output": "[[\"\"]]"
+    },
+    {
+      "input": "strs = [\"a\"]",
+      "output": "[[\"a\"]]"
+    }
+  ],
+  "constraints": [
+    "1 <= strs.length <= 10^4",
+    "0 <= strs[i].length <= 100",
+    "strs[i] consists of lowercase English letters."
+  ],
+  "functionName": "groupAnagrams",
+  "params": ["strs"],
+  "judge": "unordered_inner",
+  "starter": {
+    "javascript": "/**\n * @param {string[]} strs\n * @return {string[][]}\n */\nvar groupAnagrams = function(strs) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var groupAnagrams = function(strs) {\n    const groups = new Map();\n    for (const word of strs) {\n        const counts = new Array(26).fill(0);\n        for (const char of word) {\n            counts[char.charCodeAt(0) - 97] += 1;\n        }\n        const key = counts.join(',');\n        if (!groups.has(key)) groups.set(key, []);\n        groups.get(key).push(word);\n    }\n    return Array.from(groups.values());\n};",
+    "python": "from collections import defaultdict\nfrom typing import List\n\n\nclass Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        groups = defaultdict(list)\n\n        for word in strs:\n            counts = [0] * 26\n            for char in word:\n                counts[ord(char) - ord(\"a\")] += 1\n            groups[tuple(counts)].append(word)\n\n        return list(groups.values())\n"
+  },
+  "approach": "Anagrams have identical counts for each of the 26 lowercase letters. Build a fixed-length count tuple for each word and append the word to the hash-map bucket for that tuple. Let S be the total number of characters across all words. Time complexity is O(S), because the key has constant size 26. Space complexity is O(S) including the grouped output and stored word references (with O(g) fixed-size keys for g groups).",
+  "complexity": { "time": "O(S)", "space": "O(S)" },
+  "tests": [
+    { "args": [["eat", "tea", "tan", "ate", "nat", "bat"]], "expected": [["eat", "tea", "ate"], ["tan", "nat"], ["bat"]] },
+    { "args": [[""]], "expected": [[""]] },
+    { "args": [["abc", "cba", "bca", "xyz", "zyx", "a", "ab", "ba", "abab", "baba"]], "expected": [["abc", "cba", "bca"], ["xyz", "zyx"], ["a"], ["ab", "ba"], ["abab", "baba"]] }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "lc-hard-largest-rectangle-histogram",
+  "title": "Largest Rectangle in Histogram",
+  "difficulty": "Hard",
+  "tags": ["Array", "Stack", "Monotonic Stack"],
+  "description": "Given an array of integers heights representing the heights of unit-width histogram bars, return the area of the largest axis-aligned rectangle that can be formed using consecutive bars.\n\nEach bar has width 1, and the rectangle must be bounded from below by the x-axis. Its height is limited by the shortest bar it spans.",
+  "examples": [
+    { "input": "heights = [2,1,5,6,2,3]", "output": "10", "explanation": "The largest rectangle spans bars of height 5 and 6 (indices 2 and 3), giving area 5 * 2 = 10." },
+    { "input": "heights = [2,4]", "output": "4", "explanation": "The rectangle covering only the second bar has area 4 * 1 = 4, which beats 2 * 2 = 4 tie and any wider option." },
+    { "input": "heights = [1,1,1,1]", "output": "4", "explanation": "All four bars share height 1, so the full-width rectangle has area 1 * 4 = 4." }
+  ],
+  "constraints": [
+    "1 <= heights.length <= 10^5",
+    "0 <= heights[i] <= 10^4"
+  ],
+  "functionName": "largestRectangleArea",
+  "params": ["heights"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {number[]} heights\n * @return {number}\n */\nvar largestRectangleArea = function(heights) {\n    \n};",
+    "python": "class Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var largestRectangleArea = function(heights) {\n    const stack = []; // [earliestStart, height]\n    let best = 0;\n    const extended = heights.concat(0);\n\n    for (let index = 0; index < extended.length; index++) {\n        const height = extended[index];\n        let start = index;\n        while (stack.length && stack[stack.length - 1][1] > height) {\n            const [poppedStart, oldHeight] = stack.pop();\n            start = poppedStart;\n            best = Math.max(best, oldHeight * (index - poppedStart));\n        }\n        stack.push([start, height]);\n    }\n\n    return best;\n};",
+    "python": "from typing import List\n\nclass Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        stack = []  # (earliest_start, height)\n        best = 0\n\n        for index, height in enumerate(heights + [0]):\n            start = index\n            while stack and stack[-1][1] > height:\n                start, old_height = stack.pop()\n                best = max(best, old_height * (index - start))\n            stack.append((start, height))\n\n        return best"
+  },
+  "approach": "Maintain a stack of bars in increasing height order, storing each bar's earliest start index. When the current bar is shorter than the stack top, pop bars whose right boundary is now known: a popped bar of height h extends from its saved start through the previous index, so its area is h * (index - start). The popped start is inherited by the current bar because it can extend left over those shorter-or-equal columns. Appending a height-0 sentinel flushes the stack at the end. Each bar is pushed and popped at most once, so the algorithm runs in O(n) time with O(n) auxiliary space.",
+  "complexity": { "time": "O(n)", "space": "O(n)" },
+  "tests": [
+    { "args": [[2, 1, 5, 6, 2, 3]], "expected": 10 },
+    { "args": [[2, 4]], "expected": 4 },
+    { "args": [[6, 2, 5, 4, 5, 1, 6]], "expected": 12 }
+  ]
+}

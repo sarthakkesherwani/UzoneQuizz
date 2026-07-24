@@ -1,0 +1,35 @@
+{
+  "id": "lc-hard-remove-invalid-parentheses",
+  "title": "Remove Invalid Parentheses",
+  "difficulty": "Hard",
+  "tags": ["String", "Backtracking", "Breadth-First Search"],
+  "description": "Given a string s that contains parentheses and lowercase letters, remove the minimum number of invalid parentheses to make the input string valid.\n\nA string is valid if every open parenthesis '(' has a matching close parenthesis ')' and no close parenthesis appears before its matching open. Letters and other non-parenthesis characters must be kept in place.\n\nReturn a list of all the distinct strings that are valid and obtained by removing that minimum number of parentheses. The answer may be returned in any order.",
+  "examples": [
+    { "input": "s = \"()())()\"", "output": "[\"(())()\",\"()()()\"]", "explanation": "Removing one ')' yields two distinct valid strings, both using the minimum of one removal." },
+    { "input": "s = \"(a)())()\"", "output": "[\"(a())()\",\"(a)()()\"]", "explanation": "One ')' is removed while the letter 'a' stays in place." },
+    { "input": "s = \")(\"", "output": "[\"\"]", "explanation": "Removing both parentheses leaves the empty string, which is valid." }
+  ],
+  "constraints": [
+    "1 <= s.length <= 25",
+    "s consists of lowercase English letters and parentheses '(' and ')'.",
+    "There will be at most 20 parentheses in s."
+  ],
+  "functionName": "removeInvalidParentheses",
+  "params": ["s"],
+  "judge": "unordered",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @return {string[]}\n */\nvar removeInvalidParentheses = function(s) {\n    \n};",
+    "python": "from typing import List\n\nclass Solution:\n    def removeInvalidParentheses(self, s: str) -> List[str]:\n        pass"
+  },
+  "solution": {
+    "javascript": "var removeInvalidParentheses = function(s) {\n    function valid(candidate) {\n        let balance = 0;\n        for (const ch of candidate) {\n            if (ch === '(') balance++;\n            else if (ch === ')') {\n                balance--;\n                if (balance < 0) return false;\n            }\n        }\n        return balance === 0;\n    }\n\n    let level = new Set([s]);\n    while (level.size) {\n        const answers = [];\n        for (const candidate of level) {\n            if (valid(candidate)) answers.push(candidate);\n        }\n        if (answers.length) return answers;\n\n        const nextLevel = new Set();\n        for (const candidate of level) {\n            for (let i = 0; i < candidate.length; i++) {\n                const ch = candidate[i];\n                if (ch !== '(' && ch !== ')') continue;\n                if (i > 0 && candidate[i] === candidate[i - 1]) continue;\n                nextLevel.add(candidate.slice(0, i) + candidate.slice(i + 1));\n            }\n        }\n        level = nextLevel;\n    }\n    return [\"\"];\n};",
+    "python": "from typing import List\n\n\nclass Solution:\n    def removeInvalidParentheses(self, s: str) -> List[str]:\n        def valid(candidate: str) -> bool:\n            balance = 0\n            for ch in candidate:\n                if ch == '(':\n                    balance += 1\n                elif ch == ')':\n                    balance -= 1\n                    if balance < 0:\n                        return False\n            return balance == 0\n\n        level = {s}\n        while level:\n            answers = sorted(candidate for candidate in level if valid(candidate))\n            if answers:\n                return answers\n\n            next_level = set()\n            for candidate in level:\n                for i, ch in enumerate(candidate):\n                    if ch not in '()':\n                        continue\n                    if i > 0 and candidate[i] == candidate[i - 1]:\n                        continue\n                    next_level.add(candidate[:i] + candidate[i + 1:])\n            level = next_level\n\n        return [\"\"]\n"
+  },
+  "approach": "Do a breadth-first search over strings, where each edge deletes one parenthesis. Because every string at a BFS level shares the same removal count, the first level that contains any valid string is guaranteed to use the minimum number of removals. Collect all valid strings from that level. A set of visited strings prevents duplicate states and outputs, and skipping a parenthesis identical to its left neighbor avoids generating the same child twice. Validity is checked with a running balance counter that must never go negative and must end at zero. In the worst case there are O(2^n) distinct removal states, each costing O(n) to build and validate.",
+  "complexity": { "time": "O(n * 2^n)", "space": "O(n * 2^n)" },
+  "tests": [
+    { "args": ["()())()"], "expected": ["(())()", "()()()"] },
+    { "args": ["(a)())()"], "expected": ["(a())()", "(a)()()"] },
+    { "args": [")("], "expected": [""] }
+  ]
+}

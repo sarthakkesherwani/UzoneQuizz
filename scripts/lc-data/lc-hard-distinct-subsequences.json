@@ -1,0 +1,34 @@
+{
+  "id": "lc-hard-distinct-subsequences",
+  "title": "Distinct Subsequences",
+  "difficulty": "Hard",
+  "tags": ["String", "Dynamic Programming"],
+  "description": "Given two strings s and t, return the number of distinct subsequences of s which equal t.\n\nA subsequence of a string is a new string formed from the original string by deleting some (possibly zero) of the characters without disturbing the relative positions of the remaining characters. For example, \"ACE\" is a subsequence of \"ABCDE\" while \"AEC\" is not.\n\nThe answer fits within a 32-bit signed integer.",
+  "examples": [
+    { "input": "s = \"rabbbit\", t = \"rabbit\"", "output": "3", "explanation": "There are 3 ways to generate \"rabbit\" from \"rabbbit\" by deleting one of the three 'b' characters." },
+    { "input": "s = \"babgbag\", t = \"bag\"", "output": "5", "explanation": "There are 5 ways to generate \"bag\" from \"babgbag\" by choosing different combinations of the matching characters." }
+  ],
+  "constraints": [
+    "1 <= s.length, t.length <= 1000",
+    "s and t consist of English letters.",
+    "The answer is guaranteed to fit in a 32-bit signed integer."
+  ],
+  "functionName": "numDistinct",
+  "params": ["s", "t"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @param {string} t\n * @return {number}\n */\nvar numDistinct = function(s, t) {\n    \n};",
+    "python": "class Solution:\n    def numDistinct(self, s: str, t: str) -> int:\n        pass"
+  },
+  "solution": {
+    "javascript": "var numDistinct = function(s, t) {\n    const n = t.length;\n    const dp = new Array(n + 1).fill(0);\n    dp[0] = 1;\n\n    for (const sourceChar of s) {\n        for (let j = n; j >= 1; j--) {\n            if (sourceChar === t[j - 1]) {\n                dp[j] += dp[j - 1];\n            }\n        }\n    }\n\n    return dp[n];\n};",
+    "python": "class Solution:\n    def numDistinct(self, s: str, t: str) -> int:\n        dp = [0] * (len(t) + 1)\n        dp[0] = 1\n\n        for source_char in s:\n            for j in range(len(t), 0, -1):\n                if source_char == t[j - 1]:\n                    dp[j] += dp[j - 1]\n\n        return dp[-1]"
+  },
+  "approach": "Let dp[j] count the distinct ways to form the first j characters of t using the source characters seen so far. Start with dp[0] = 1 because the empty target is always matched exactly once. For each character of s, iterate j from high to low: when the source character equals t[j-1], add dp[j-1] to dp[j]. Iterating backward ensures dp[j-1] still reflects counts before the current source character, so a single source character is never reused within one update. The final answer is dp[len(t)]. For source length m and target length n, time is O(mn) and space is O(n).",
+  "complexity": { "time": "O(m*n)", "space": "O(n)" },
+  "tests": [
+    { "args": ["rabbbit", "rabbit"], "expected": 3 },
+    { "args": ["babgbag", "bag"], "expected": 5 },
+    { "args": ["aaa", "a"], "expected": 3 }
+  ]
+}

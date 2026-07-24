@@ -1,0 +1,37 @@
+{
+  "id": "lc-hard-regex-matching",
+  "title": "Regular Expression Matching",
+  "difficulty": "Hard",
+  "tags": ["String", "Dynamic Programming", "Recursion"],
+  "description": "Given an input string s and a pattern p, implement regular expression matching with support for '.' and '*' where:\n\n- '.' matches any single character.\n- '*' matches zero or more of the preceding element.\n\nThe matching should cover the entire input string (not partial).",
+  "examples": [
+    { "input": "s = \"aa\", p = \"a\"", "output": "false", "explanation": "\"a\" does not match the entire string \"aa\"." },
+    { "input": "s = \"aa\", p = \"a*\"", "output": "true", "explanation": "'*' means zero or more of the preceding element, 'a'. Therefore, by repeating 'a' once, it becomes \"aa\"." },
+    { "input": "s = \"ab\", p = \".*\"", "output": "true", "explanation": "\".*\" means \"zero or more (*) of any character (.)\"." }
+  ],
+  "constraints": [
+    "1 <= s.length <= 20",
+    "1 <= p.length <= 20",
+    "s contains only lowercase English letters.",
+    "p contains only lowercase English letters, '.', and '*'.",
+    "It is guaranteed for each appearance of the character '*', there will be a previous valid character to match."
+  ],
+  "functionName": "isMatch",
+  "params": ["s", "p"],
+  "judge": "exact",
+  "starter": {
+    "javascript": "/**\n * @param {string} s\n * @param {string} p\n * @return {boolean}\n */\nvar isMatch = function(s, p) {\n    \n};",
+    "python": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        pass"
+  },
+  "solution": {
+    "javascript": "var isMatch = function(s, p) {\n    const m = s.length, n = p.length;\n    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(false));\n    dp[0][0] = true;\n\n    for (let j = 2; j <= n; j++) {\n        if (p[j - 1] === '*') {\n            dp[0][j] = dp[0][j - 2];\n        }\n    }\n\n    for (let i = 1; i <= m; i++) {\n        for (let j = 1; j <= n; j++) {\n            const token = p[j - 1];\n            if (token === '.' || token === s[i - 1]) {\n                dp[i][j] = dp[i - 1][j - 1];\n            } else if (token === '*' && j >= 2) {\n                dp[i][j] = dp[i][j - 2];\n                const repeated = p[j - 2];\n                if (repeated === '.' || repeated === s[i - 1]) {\n                    dp[i][j] = dp[i][j] || dp[i - 1][j];\n                }\n            }\n        }\n    }\n\n    return dp[m][n];\n};",
+    "python": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        m, n = len(s), len(p)\n        dp = [[False] * (n + 1) for _ in range(m + 1)]\n        dp[0][0] = True\n\n        for j in range(2, n + 1):\n            if p[j - 1] == '*':\n                dp[0][j] = dp[0][j - 2]\n\n        for i in range(1, m + 1):\n            for j in range(1, n + 1):\n                token = p[j - 1]\n                if token == '.' or token == s[i - 1]:\n                    dp[i][j] = dp[i - 1][j - 1]\n                elif token == '*' and j >= 2:\n                    dp[i][j] = dp[i][j - 2]\n                    repeated = p[j - 2]\n                    if repeated == '.' or repeated == s[i - 1]:\n                        dp[i][j] = dp[i][j] or dp[i - 1][j]\n\n        return dp[m][n]"
+  },
+  "approach": "Let dp[i][j] state whether the first i text characters match the first j pattern characters. A normal character or '.' extends dp[i-1][j-1]. For '*', either ignore the preceding element via dp[i][j-2], or, when that element matches the current text character, consume one character while retaining the pattern via dp[i-1][j]. Initialization also permits x* pairs to match an empty text. For text length m and pattern length n, time is O(mn) and space is O(mn).",
+  "complexity": { "time": "O(m*n)", "space": "O(m*n)" },
+  "tests": [
+    { "args": ["aa", "a*"], "expected": true },
+    { "args": ["mississippi", "mis*is*p*."], "expected": false },
+    { "args": ["aab", "c*a*b"], "expected": true }
+  ]
+}
