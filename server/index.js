@@ -73,7 +73,17 @@ async function connectWithRetry(uri, { attempts = 30, delayMs = 1000 } = {}) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
     const client = new MongoClient(uri);
-    try { await client.connect(); return client; }
+    try {
+  console.log("Trying MongoDB connection...");
+  await client.connect();
+  console.log("MongoDB connected successfully");
+  return client;
+} catch (err) {
+  console.error("MongoDB connect failed:", err.message);
+  lastErr = err;
+  await client.close();
+  await new Promise(r => setTimeout(r, delayMs));
+}
     catch (err) { lastErr = err; await client.close(); await new Promise(r => setTimeout(r, delayMs)); }
   }
   throw lastErr;
