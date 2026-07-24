@@ -94,7 +94,9 @@ async function main() {
     process.exit(1);
   }
   const db = client.db();
+   console.log("MongoDB connected");
   await seedIfEmpty(db, { log: console.log });
+   console.log("Seed completed");
 
   const handle = buildApp({ db, cfg });
   const server = http.createServer(handle);
