@@ -5,8 +5,6 @@ const { verify: bcryptVerify, isBcryptHash } = require('../lib/bcrypt');
 const { HttpError, sendJson } = require('../lib/httpx');
 const { uid, isEmail, reqStr } = require('../lib/util');
 
-const DEMO_EMAILS = { teacher: 'teacher@uzonequiz.app', student: 'demo@uzonequiz.app' };
-
 /* New registrations are students by default. The browser must never be able
    to grant teacher access by submitting a role field. Teacher accounts can be
    provisioned only through server-owned configuration. */
@@ -27,9 +25,7 @@ const publicUser = (u) => u && ({
   bookmarks: u.bookmarks || [], quizBookmarks: u.quizBookmarks || [],
 });
 
-/* Resolves the acting identity for a request. Real JWT wins; otherwise the
-   request falls back to the seeded demo account for the role in X-Role, so the
-   app remains fully usable without logging in (matching the prototype UX). */
+/* Resolves the authenticated identity. Unauthenticated requests are guests. */
 async function resolveUser(req, db, cfg, verifyToken) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -48,8 +44,7 @@ async function resolveUser(req, db, cfg, verifyToken) {
     }
   }
   const actingRole = req.headers['x-role'] === 'teacher' ? 'teacher' : 'student';
-  const user = await users.findOne({ email: DEMO_EMAILS[actingRole] });
-  return { user, actingRole, authed: false };
+  return { user: null, actingRole, authed: false };
 }
 
 function registerAuthRoutes(router, { db, cfg, verifyToken: verify }) {
@@ -106,14 +101,8 @@ function registerAuthRoutes(router, { db, cfg, verifyToken: verify }) {
 
   router.post('/api/auth/role', async (ctx) => {
     const wantedRole = ctx.body.role === 'teacher' ? 'teacher' : 'student';
-    if (!ctx.authed) {
-      const demo = await users().findOne({ email: DEMO_EMAILS[wantedRole] });
-      if (!demo) throw new HttpError(500, 'Demo accounts missing — run the seed');
-      sendJson(ctx.res, 200, { token: null, user: publicUser(demo) });
-      return;
-    }
-    // Only seeded demo accounts may use the prototype role switcher.
-    const actingRole = ctx.user.isDemo ? wantedRole : ctx.user.role;
+    if (!ctx.authed) throw new HttpError(401, 'Authentication required');
+    const actingRole = ctx.user.role;
     sendJson(ctx.res, 200, issue(ctx.user, actingRole));
   });
 
@@ -132,4 +121,4 @@ function registerAuthRoutes(router, { db, cfg, verifyToken: verify }) {
   });
 }
 
-module.exports = { registerAuthRoutes, resolveUser, publicUser, DEMO_EMAILS };
+module.exports = { registerAuthRoutes, resolveUser, publicUser };
