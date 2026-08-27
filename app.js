@@ -14,15 +14,7 @@
   const topicBank = bank.topicQuestions;
   const leetcodeQuizzes = (bank.leetcodeQuizzes || []).map(q => ({ ...q, id:q.id, questions:q.questions.map(x=>({...x, options:[...x.options]})) }));
 
-  const defaultQuizzes = [
-    { id:'java-5', title:'Java Quiz — Batch 5.0', subject:'Java', batch:'5.0', semester:'4', topic:'OOP & Collections', difficulty:'Medium', marks:100, timer:35, questions:topicBank.Java || sampleQuestions, status:'Published', attempts:284, accuracy:78, retry:true, leaderboard:true, color:'#4d94ff', date:'Today, 10:30 AM' },
-    { id:'dsa-5', title:'DSA Sprint — Batch 5.0', subject:'DSA', batch:'5.0', semester:'4', topic:'Trees & Graphs', difficulty:'Hard', marks:50, timer:25, questions:topicBank.DSA || sampleQuestions, status:'Published', attempts:196, accuracy:64, retry:false, leaderboard:true, color:'#9c8cff', date:'Yesterday' },
-    { id:'dbms-3', title:'DBMS Quiz — Batch 3.0', subject:'DBMS', batch:'3.0', semester:'3', topic:'Normalization', difficulty:'Medium', marks:50, timer:20, questions:topicBank.DBMS || sampleQuestions, status:'Scheduled', attempts:0, accuracy:0, retry:true, leaderboard:false, color:'#55d9ff', date:'Jul 22, 9:00 AM' },
-    { id:'java-4', title:'Java Quiz — Batch 4.0', subject:'Java', batch:'4.0', semester:'3', topic:'Core Java', difficulty:'Easy', marks:100, timer:35, questions:topicBank.Java || sampleQuestions, status:'Published', attempts:412, accuracy:82, retry:true, leaderboard:true, color:'#4de3a3', date:'Jul 15' },
-    { id:'os-4', title:'Operating Systems — Batch 4.0', subject:'OS', batch:'4.0', semester:'5', topic:'Processes & Threads', difficulty:'Hard', marks:50, timer:25, questions:topicBank.OS || sampleQuestions, status:'Draft', attempts:0, accuracy:0, retry:false, leaderboard:false, color:'#ffbf62', date:'Edited 2h ago' },
-    { id:'cn-3', title:'Computer Networks — Batch 3.0', subject:'Networks', batch:'3.0', semester:'5', topic:'OSI & TCP/IP', difficulty:'Easy', marks:50, timer:20, questions:topicBank.Networks || sampleQuestions, status:'Published', attempts:318, accuracy:86, retry:true, leaderboard:true, color:'#ff7d91', date:'Jul 10' },
-    ...leetcodeQuizzes
-  ];
+  const defaultQuizzes = [];
 
 
   let students = [];
@@ -38,13 +30,13 @@
   }
 
   let persisted = {};
-  try { persisted = JSON.parse(localStorage.getItem('uzonequiz-session') || '{}'); } catch (_) {}
+  try { persisted = JSON.parse(localStorage.getItem('uzonequiz-session-v2') || '{}'); } catch (_) {}
 
   const state = {
     role: persisted.role || 'teacher',
     page: 'dashboard',
-    quizzes: Array.isArray(persisted.quizzes) && persisted.quizzes.length ? persisted.quizzes : defaultQuizzes,
-    bookmarks: new Set(persisted.bookmarks || ['java-q3']),
+    quizzes: Array.isArray(persisted.quizzes) ? persisted.quizzes : defaultQuizzes,
+    bookmarks: new Set(persisted.bookmarks || []),
     quizBookmarks: new Set(persisted.quizBookmarks || []),
     draft: freshDraft(),
     sidebarOpen:false,
@@ -63,7 +55,7 @@
 
   function persist() {
     const serialQuizzes = state.quizzes.map(q => ({...q, questions:q.questions || []}));
-    localStorage.setItem('uzonequiz-session', JSON.stringify({
+    localStorage.setItem('uzonequiz-session-v2', JSON.stringify({
       role:state.role,
       quizzes:serialQuizzes,
       bookmarks:[...state.bookmarks],
@@ -80,7 +72,7 @@
     if (!data) return;
     if (data.user) state.user = data.user;
     state.authed = !!data.authed;
-    if (Array.isArray(data.quizzes)) state.quizzes = data.quizzes.length ? data.quizzes : state.quizzes;
+    if (Array.isArray(data.quizzes)) state.quizzes = data.quizzes;
     if (Array.isArray(data.students)) students = data.students;
     if (Array.isArray(data.leaderboard)) leaderboard = data.leaderboard;
     if (Array.isArray(data.notifications)) notifications = data.notifications;
