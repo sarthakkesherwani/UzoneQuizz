@@ -283,28 +283,25 @@
     const mq = (q) => q ? miniQuiz(q, `${q.attempts ?? 0} attempts`, `${q.accuracy ?? 0}%`) : '';
     return `<section class="page dashboard-stack">
       <article class="hero-card">
-        <div class="hero-copy"><span class="hero-kicker"><i></i>Live classroom</span><h2>Good afternoon, ${escapeHTML(currentPerson().first)}. <span>Let’s spark curiosity.</span></h2><p>Your students completed 48 attempts this week. Create a new challenge or see where the class needs a little more help.</p><div class="hero-actions"><button class="btn btn-primary" data-page="create">${icon('plus')}Create a quiz</button><button class="btn btn-secondary" data-page="analytics">${icon('chart-no-axes-combined')}View insights</button></div></div>${mascot()}
+        <div class="hero-copy"><span class="hero-kicker"><i></i>Live classroom</span><h2>Good afternoon, ${escapeHTML(currentPerson().first)}. <span>Let’s spark curiosity.</span></h2><p>No attempts yet. Create a quiz and invite students when you’re ready.</p><div class="hero-actions"><button class="btn btn-primary" data-page="create">${icon('plus')}Create a quiz</button><button class="btn btn-secondary" data-page="analytics">${icon('chart-no-axes-combined')}View insights</button></div></div>${mascot()}
       </article>
       <div class="stats-grid">
-        ${statCard('Total quizzes', s.totalQuizzes != null ? String(s.totalQuizzes) : '24','files','12.5%','#4d94ff')}
-        ${statCard('Total students', s.totalStudents != null ? fmtCount(s.totalStudents) : '1,248','users','8.2%','#55d9ff')}
-        ${statCard('Total attempts', s.totalAttempts != null ? fmtCount(s.totalAttempts) : '8,492','mouse-pointer-click','18.4%','#4de3a3')}
-        ${statCard('Average score', s.avgScorePct != null ? `${s.avgScorePct}%` : '76.8%','gauge','2.1%','#ffbf62')}
+        ${statCard('Total quizzes', s.totalQuizzes != null ? String(s.totalQuizzes) : '0','files','—','#4d94ff')}
+        ${statCard('Total students', s.totalStudents != null ? fmtCount(s.totalStudents) : '0','users','—','#55d9ff')}
+        ${statCard('Total attempts', s.totalAttempts != null ? fmtCount(s.totalAttempts) : '0','mouse-pointer-click','—','#4de3a3')}
+        ${statCard('Average score', s.avgScorePct != null ? `${s.avgScorePct}%` : '0%','gauge','—','#ffbf62')}
       </div>
       <div class="two-column">
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Attempts this week</h3><p>Daily submission activity across all quizzes</p></div><div class="chart-legend"><span class="legend-item"><i class="legend-dot"></i>Attempts</span><button class="btn btn-ghost btn-sm">Last 7 days ${icon('chevron-down')}</button></div></div>${lineChart()}</article>
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Recent activity</h3><p>What’s happening now</p></div><button class="btn btn-ghost btn-sm">View all</button></div><div class="activity-list">
-          ${activity('users','green','No recent student activity','Student activity will appear here after quiz attempts','—')}
-          ${activity('send','','DSA Sprint was published','196 students notified','18m')}
-          ${activity('calendar-clock','amber','DBMS quiz scheduled','Tomorrow · 9:00 AM','1h')}
-          ${activity('message-circle-more','','New question discussion','8 replies on Question #4','2h')}
+          ${activity('users','green','No activity yet','Student activity will appear here after quiz attempts.','—')}
         </div></article>
       </div>
       <div class="two-column">
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Active quizzes</h3><p>Live performance snapshot</p></div><button class="btn btn-secondary btn-sm" data-page="quizzes">Manage all ${icon('arrow-up-right')}</button></div><div class="mini-quiz-list">
           ${mq(topQuizzes[0])}${mq(topQuizzes[1])}${mq(topQuizzes[2])}
         </div></article>
-        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Class pulse</h3><p>Across published assessments</p></div>${icon('ellipsis')}</div><div style="display:flex;align-items:center;justify-content:center;gap:24px;padding:13px 0 8px"><div class="progress-ring" style="--value:76"><span>76<small>%</small></span></div><div style="display:grid;gap:10px"><div><strong style="font-family:'DM Mono';font-size:12px">+4.8%</strong><span style="display:block;color:var(--muted);font-size:7px;margin-top:3px">vs. last month</span></div><div><strong style="font-family:'DM Mono';font-size:12px;color:var(--green)">Healthy</strong><span style="display:block;color:var(--muted);font-size:7px;margin-top:3px">learning velocity</span></div></div></div></article>
+        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Class pulse</h3><p>Across published assessments</p></div></div><p style="color:var(--muted);padding:13px 0 8px">Progress will appear after students complete quizzes.</p></article>
       </div>
     </section>`;
   }
