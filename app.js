@@ -302,7 +302,7 @@
       <div class="two-column">
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Attempts this week</h3><p>Daily submission activity across all quizzes</p></div><div class="chart-legend"><span class="legend-item"><i class="legend-dot"></i>Attempts</span><button class="btn btn-ghost btn-sm">Last 7 days ${icon('chevron-down')}</button></div></div>${lineChart()}</article>
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Recent activity</h3><p>What’s happening now</p></div><button class="btn btn-ghost btn-sm">View all</button></div><div class="activity-list">
-          ${activity('user-check','green','Aarav completed Java Quiz','Scored 46/50 · Batch 5.0','2m')}
+          ${activity('users','green','No recent student activity','Student activity will appear here after quiz attempts','—')}
           ${activity('send','','DSA Sprint was published','196 students notified','18m')}
           ${activity('calendar-clock','amber','DBMS quiz scheduled','Tomorrow · 9:00 AM','1h')}
           ${activity('message-circle-more','','New question discussion','8 replies on Question #4','2h')}
