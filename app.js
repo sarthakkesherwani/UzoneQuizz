@@ -384,10 +384,26 @@
   }
 
   function studentsPage() {
+    const activeStudents = students.filter(s => Number(s.attempts) > 0).length;
+    const needsAttention = students.filter(s => s.status !== 'Active').length;
+    const averageParticipation = students.length
+      ? Math.round(students.reduce((sum, s) => sum + Number(s.accuracy || 0), 0) / students.length)
+      : 0;
+    const batches = students.reduce((counts, student) => {
+      const batch = student.batch || '—';
+      counts.set(batch, (counts.get(batch) || 0) + 1);
+      return counts;
+    }, new Map());
+    const topBatch = batches.size
+      ? [...batches.entries()].sort((a, b) => b[1] - a[1])[0][0]
+      : '—';
+    const rows = students.length
+      ? students.map(s=>`<tr><td><div class="table-user"><span class="mini-avatar" style="--av1:${s.color[0]};--av2:${s.color[1]}">${initials(s.name)}</span>${escapeHTML(s.name)}</div></td><td>Batch ${escapeHTML(s.batch || '—')}</td><td>${s.attempts}</td><td class="table-score">${escapeHTML(s.score)}</td><td><div class="accuracy-bar"><span>${s.accuracy}%</span><i class="accuracy-track"><i style="width:${s.accuracy}%"></i></i></div></td><td><span class="chip ${s.status==='Active'?'published':'draft'}">${escapeHTML(s.status)}</span></td><td><button class="card-menu" data-action="student-detail" data-name="${escapeHTML(s.name)}">${icon('arrow-up-right')}</button></td></tr>`).join('')
+      : '<tr><td colspan="7" style="padding:32px;text-align:center;color:var(--muted)">No students yet. Invite students to begin tracking progress.</td></tr>';
     return `<section class="page">
       <div class="page-head"><div><span class="eyebrow">Learner directory</span><h2>Every student, in focus.</h2><p>Review participation, scores, and learners who need support.</p></div><div class="page-actions"><button class="btn btn-secondary">${icon('upload')}Import list</button><button class="btn btn-primary" data-action="invite-students">${icon('user-plus')}Invite students</button></div></div>
-      <div class="stats-grid">${statCard('Active students','1,186','user-check','7.2%','#4de3a3')}${statCard('Need attention','62','circle-alert','1.4%','#ff7d91',true)}${statCard('Avg. participation','91%','activity','3.8%','#4d94ff')}${statCard('Top batch','Batch 5.0','medal','4.1%','#ffbf62')}</div>
-      <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Student performance</h3><p>All enrolled learners · updated live</p></div><div class="page-actions"><button class="btn btn-secondary btn-sm">All batches ${icon('chevron-down')}</button><button class="btn btn-secondary btn-sm">${icon('sliders-horizontal')}Filter</button></div></div><div class="table-wrapper"><table class="data-table"><thead><tr><th>Student</th><th>Batch</th><th>Attempts</th><th>Total score</th><th>Accuracy</th><th>Status</th><th></th></tr></thead><tbody>${students.map(s=>`<tr><td><div class="table-user"><span class="mini-avatar" style="--av1:${s.color[0]};--av2:${s.color[1]}">${initials(s.name)}</span>${s.name}</div></td><td>Batch ${s.batch}</td><td>${s.attempts}</td><td class="table-score">${s.score}</td><td><div class="accuracy-bar"><span>${s.accuracy}%</span><i class="accuracy-track"><i style="width:${s.accuracy}%"></i></i></div></td><td><span class="chip ${s.status==='Active'?'published':'draft'}">${s.status}</span></td><td><button class="card-menu" data-action="student-detail" data-name="${escapeHTML(s.name)}">${icon('arrow-up-right')}</button></td></tr>`).join('')}</tbody></table></div></article>
+      <div class="stats-grid">${statCard('Active students',String(activeStudents),'user-check','—','#4de3a3')}${statCard('Need attention',String(needsAttention),'circle-alert','—','#ff7d91',true)}${statCard('Avg. participation',`${averageParticipation}%`,'activity','—','#4d94ff')}${statCard('Top batch',topBatch === '—' ? '—' : `Batch ${topBatch}`,'medal','—','#ffbf62')}</div>
+      <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Student performance</h3><p>All enrolled learners · updated live</p></div><div class="page-actions"><button class="btn btn-secondary btn-sm">All batches ${icon('chevron-down')}</button><button class="btn btn-secondary btn-sm">${icon('sliders-horizontal')}Filter</button></div></div><div class="table-wrapper"><table class="data-table"><thead><tr><th>Student</th><th>Batch</th><th>Attempts</th><th>Total score</th><th>Accuracy</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></article>
     </section>`;
   }
 
