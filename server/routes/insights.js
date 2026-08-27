@@ -8,7 +8,9 @@ const { buildLeaderboard, toQuiz } = require('./content');
 const { publicUser } = require('./auth');
 
 const requireTeacher = (ctx) => {
-  if (ctx.actingRole !== 'teacher') throw new HttpError(403, 'Teacher access required');
+  if (!ctx.authed || !ctx.user || ctx.user.role !== 'teacher') {
+    throw new HttpError(403, 'Teacher access required');
+  }
 };
 
 function timeAgo(date) {
