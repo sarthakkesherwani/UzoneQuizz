@@ -20,18 +20,13 @@ Open <http://localhost:5050>.
 
 For local development, `npm run dev` attempts to start a local MongoDB instance and then runs the app.
 
-## Demo accounts
-
-- Student: `demo@uzonequiz.app` / `demopass`
-- Teacher: `teacher@uzonequiz.app` / `teachpass`
-
 ## Features
 
 - Register, login, authenticated profile, role-aware access, and server-side logout/revocation
 - Teacher quiz create/update/delete and publishing
 - Student attempts scored on the server
 - Leaderboards, analytics, student summaries, bookmarks, and notifications
-- MongoDB persistence and automatic seed data
+- MongoDB persistence without pre-created user accounts
 - Static frontend hosting and health endpoint at `/api/health`
 
 ## Commands
