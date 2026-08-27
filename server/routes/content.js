@@ -11,7 +11,9 @@ const toQuiz = (doc) => {
 };
 
 const requireTeacher = (ctx) => {
-  if (ctx.actingRole !== 'teacher') throw new HttpError(403, 'Teacher access required');
+  if (!ctx.authed || !ctx.user || ctx.user.role !== 'teacher') {
+    throw new HttpError(403, 'Teacher access required');
+  }
 };
 
 /* Best attempt per user for a quiz, ranked by marks then completion time. */
