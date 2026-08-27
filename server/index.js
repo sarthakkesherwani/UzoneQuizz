@@ -116,8 +116,6 @@ async function main() {
   server.listen(port, () => {
     console.log(`\nUzoneQuiz is running:  http://localhost:${port}`);
     console.log('API base:              /api  (health: /api/health)');
-    console.log('Demo logins:           demo@uzonequiz.app / demopass (student)');
-    console.log('                       teacher@uzonequiz.app / teachpass (teacher)');
   });
   server.on('error', (err) => { console.error('HTTP server error:', err.message); process.exit(1); });
 
