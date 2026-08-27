@@ -25,31 +25,9 @@
   ];
 
 
-  let students = [
-    { name:'Aarav Mehta', batch:'5.0', attempts:12, score:'460 / 520', accuracy:88, status:'Active', color:['#3b8eff','#0d4baf'] },
-    { name:'Diya Sharma', batch:'5.0', attempts:11, score:'431 / 490', accuracy:86, status:'Active', color:['#a48fff','#5840bd'] },
-    { name:'Kabir Singh', batch:'4.0', attempts:15, score:'532 / 650', accuracy:82, status:'Active', color:['#42d8ad','#168866'] },
-    { name:'Ananya Roy', batch:'5.0', attempts:10, score:'378 / 450', accuracy:84, status:'Active', color:['#ffad62','#bd641d'] },
-    { name:'Ishaan Verma', batch:'3.0', attempts:8, score:'276 / 360', accuracy:77, status:'At risk', color:['#ff7d91','#b23551'] },
-    { name:'Meera Nair', batch:'4.0', attempts:14, score:'501 / 600', accuracy:84, status:'Active', color:['#55c9ff','#126b9b'] }
-  ];
-
-  let leaderboard = [
-    { name:'Diya Sharma', marks:48, time:'08:42', batch:'5.0' },
-    { name:'Aarav Mehta', marks:46, time:'09:11', batch:'5.0' },
-    { name:'Meera Nair', marks:44, time:'08:56', batch:'4.0' },
-    { name:'Pragati', marks:42, time:'10:24', batch:'5.0', me:true },
-    { name:'Kabir Singh', marks:40, time:'09:48', batch:'4.0' },
-    { name:'Ananya Roy', marks:38, time:'11:02', batch:'5.0' },
-    { name:'Ishaan Verma', marks:36, time:'10:46', batch:'3.0' }
-  ];
-
-  let notifications = [
-    { icon:'sparkles', title:'New quiz published', body:'Java Quiz — Batch 5.0 is ready to attempt.', time:'2 min ago', unread:true },
-    { icon:'clock-3', title:'Quiz reminder', body:'Your scheduled DBMS quiz begins tomorrow at 9:00 AM.', time:'1 hour ago', unread:true },
-    { icon:'trophy', title:'You moved up 3 places', body:'Your latest Java score puts you at rank #4.', time:'Yesterday', unread:false },
-    { icon:'message-square-more', title:'New teacher explanation', body:'An explanation was added to a bookmarked DSA question.', time:'2 days ago', unread:false }
-  ];
+  let students = [];
+  let leaderboard = [];
+  let notifications = [];
 
   function freshDraft() {
     return {
@@ -60,7 +38,7 @@
   }
 
   let persisted = {};
-  try { persisted = JSON.parse(localStorage.getItem('uzonequiz-demo') || '{}'); } catch (_) {}
+  try { persisted = JSON.parse(localStorage.getItem('uzonequiz-session') || '{}'); } catch (_) {}
 
   const state = {
     role: persisted.role || 'teacher',
@@ -85,7 +63,7 @@
 
   function persist() {
     const serialQuizzes = state.quizzes.map(q => ({...q, questions:q.questions || []}));
-    localStorage.setItem('uzonequiz-demo', JSON.stringify({
+    localStorage.setItem('uzonequiz-session', JSON.stringify({
       role:state.role,
       quizzes:serialQuizzes,
       bookmarks:[...state.bookmarks],
@@ -103,9 +81,9 @@
     if (data.user) state.user = data.user;
     state.authed = !!data.authed;
     if (Array.isArray(data.quizzes)) state.quizzes = data.quizzes.length ? data.quizzes : state.quizzes;
-    if (Array.isArray(data.students) && data.students.length) students = data.students;
-    if (Array.isArray(data.leaderboard) && data.leaderboard.length) leaderboard = data.leaderboard;
-    if (Array.isArray(data.notifications) && data.notifications.length) notifications = data.notifications;
+    if (Array.isArray(data.students)) students = data.students;
+    if (Array.isArray(data.leaderboard)) leaderboard = data.leaderboard;
+    if (Array.isArray(data.notifications)) notifications = data.notifications;
     if (Array.isArray(data.bookmarks)) state.bookmarks = new Set(data.bookmarks);
     if (Array.isArray(data.quizBookmarks)) state.quizBookmarks = new Set(data.quizBookmarks);
     if (data.stats) state.serverStats = data.stats;
@@ -172,8 +150,7 @@
     if (window.lucide) window.lucide.createIcons({ attrs:{ 'stroke-width':1.8 } });
   }
 
-  /* Identity shown in the topbar/sidebar/heroes: the signed-in account when a
-     real session exists, otherwise the original demo personas. */
+  /* Identity shown in the topbar/sidebar/heroes. */
   function currentPerson() {
     if (state.authed && state.user) {
       const first = state.user.name.split(' ')[0];
@@ -184,8 +161,8 @@
       };
     }
     return state.role === 'teacher'
-      ? { name:'Pragati', first:'Pragati', role:'Teacher · Computer Science', ini:'P' }
-      : { name:'Pragati', first:'Pragati', role:'Student · Batch 5.0', ini:'P' };
+      ? { name:'Guest', first:'Guest', role:'Sign in to manage quizzes', ini:'G' }
+      : { name:'Guest', first:'Guest', role:'Sign in to track your progress', ini:'G' };
   }
 
   function render() {
@@ -234,7 +211,7 @@
     return `
       <aside class="sidebar ${state.sidebarOpen ? 'open' : ''}">
         <div class="brand"><div class="brand-mark">U</div><div class="brand-copy">Uzone<span>Quiz</span><small>Learn · Test · Grow</small></div></div>
-        <div class="role-switcher" aria-label="Switch demo role">
+        <div class="role-switcher" aria-label="Switch workspace role">
           <button class="role-btn ${state.role === 'teacher' ? 'active' : ''}" data-action="switch-role" data-role="teacher">Teacher</button>
           <button class="role-btn ${state.role === 'student' ? 'active' : ''}" data-action="switch-role" data-role="student">Student</button>
         </div>
