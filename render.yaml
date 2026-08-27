@@ -6,7 +6,7 @@ services:
     name: uzonequiz
     runtime: node
     plan: free
-    buildCommand: ""            # zero npm dependencies — nothing to install
+    buildCommand: npm ci          # install the production dependencies
     startCommand: node server/index.js
     healthCheckPath: /api/health
     autoDeploy: true
