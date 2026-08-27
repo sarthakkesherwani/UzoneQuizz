@@ -45,25 +45,9 @@ Requirements: Node.js 18+ and MongoDB.
 
    http://localhost:5050
 
-Demo accounts
--------------
-Student:
-  Email: demo@uzonequiz.app
-  Password: demopass
-
-Teacher:
-  Email: teacher@uzonequiz.app
-  Password: teachpass
-
-Important seed step
--------------------
-If this is a fresh database, the app seeds automatically on first start.
-If an existing database already has the old quiz data, run this once from the project folder:
-
-  npm run reseed
-
-WARNING: npm run reseed uses --force and clears the demo collections before reseeding.
-Back up any real data before running it.
+Database setup
+--------------
+The application no longer creates demo users. Register the accounts you need through the app, or provision a teacher account with the server configuration.
 
 Validation already completed
 ----------------------------
