@@ -1,6 +1,6 @@
 'use strict';
 
-const { MongoClient } = require('./lib/mongo');
+const { MongoClient } = require('mongodb');
 
 /*
  * UzoneQuiz intentionally starts without demo accounts or sample attempts.
