@@ -581,7 +581,8 @@ html.dark .mobile-bottom-nav { background: rgba(29,32,39,.92); border-color: var
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   transform: translateX(-50%);
   isolation: isolate;
-  overflow: visible;
+  /* Keep the refraction and travel animation inside the rounded dock. */
+  overflow: hidden;
 }
 
 html.dark .mobile-bottom-nav.liquid-dock {
