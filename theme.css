@@ -618,7 +618,9 @@ html.dark .mobile-bottom-nav.liquid-dock {
   width: calc(20% - 2.8px);
   height: 56px;
   padding: 2px;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
   transform: translate3d(var(--liquid-offset), 0, 0);
   transition:
     transform .43s cubic-bezier(.22, .92, .28, 1),
@@ -626,6 +628,8 @@ html.dark .mobile-bottom-nav.liquid-dock {
   will-change: transform;
 }
 .liquid-glass-indicator.is-hidden { opacity: 0; }
+.liquid-glass-indicator.is-dragging { cursor: grabbing; transition: none; }
+.liquid-glass-indicator.is-dragging .liquid-glass-core { transform: scale(1.04); }
 
 .liquid-glass-core {
   position: relative;
