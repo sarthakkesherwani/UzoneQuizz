@@ -184,7 +184,7 @@
               <kbd>⌘ K</kbd>
             </label>
             <div class="top-actions">
-              <button class="icon-btn" data-action="toggle-theme" aria-label="Toggle color mode">${icon(document.documentElement.classList.contains('dark') ? 'sun' : 'moon')}</button>
+              <button class="icon-btn" data-action="toggle-theme" aria-label="Toggle color mode">${icon('palette')}</button>
               <button class="icon-btn" data-action="open-notifications" aria-label="Open notifications">${icon('bell')}<span class="notification-dot"></span></button>
               ${state.authed ? `<button class="icon-btn" data-action="logout" aria-label="Log out">${icon('log-out')}</button>` : ''}
               <button class="top-avatar" data-action="open-auth" aria-label="Open profile">${currentPerson().ini}</button>
@@ -754,7 +754,7 @@
       case 'close-sidebar': state.sidebarOpen=false; render(); break;
       case 'switch-role': switchRole(target.dataset.role); break;
       case 'toggle-theme': {
-        const dark=!document.documentElement.classList.contains('dark'); document.documentElement.classList.toggle('dark',dark); localStorage.setItem('uzone-studio-theme',dark?'dark':'light'); render(); toast(`${dark?'Ink':'Paper'} mode enabled`,'Your preference has been saved.',dark?'moon':'sun'); break;
+        const html=document.documentElement; const isNebula=html.classList.contains('nebula'); const isDark=html.classList.contains('dark'); let next,label,ic; if (!isDark && !isNebula) { next='dark'; label='Ink'; ic='moon'; } else if (isDark && !isNebula) { next='nebula'; label='Nebula'; ic='orbit'; } else { next='light'; label='Paper'; ic='sun'; } html.classList.toggle('dark',next !== 'light'); html.classList.toggle('nebula',next === 'nebula'); localStorage.setItem('uzone-studio-theme',next); render(); toast(`${label} mode enabled`,'Your preference has been saved.',ic); break;
       }
       case 'open-notifications': openNotifications(); break;
       case 'close-drawer': closeDrawer(); break;
