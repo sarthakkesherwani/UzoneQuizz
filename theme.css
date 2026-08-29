@@ -554,6 +554,7 @@ html.dark .mobile-bottom-nav { background: rgba(29,32,39,.92); border-color: var
 .page { padding-bottom: 112px; }
 
 .mobile-bottom-nav.liquid-dock {
+  display: none;
   --dock-count: 5;
   --liquid-offset: 0%;
   --liquid-duration: 320ms;
@@ -771,6 +772,7 @@ html.dark .dock-tooltip { color: var(--text); border-color: var(--line); backgro
 @media (max-width: 720px) {
   .page { padding-bottom: 102px; }
   .mobile-bottom-nav.liquid-dock {
+    display: grid;
     left: 50%;
     right: auto;
     bottom: max(10px, env(safe-area-inset-bottom));
