@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "/tmp/claude-501/uz/serve.js",
+        "/Users/sarthakkesherwani/Downloads/my-UzoneQuizz-fix-server-bugs-and-test-suite-2"
+      ],
+      "port": 4173
+    }
+  ]
+}

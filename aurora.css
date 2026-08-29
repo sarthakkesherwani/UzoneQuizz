@@ -130,6 +130,58 @@ html.aurora .liquid-dock-item.mobile-nav-item.active,
 html.aurora .liquid-dock-item.mobile-nav-item.pending {
   color: #ff6670;
 }
+html.aurora .liquid-dock-item.mobile-nav-item.active svg,
+html.aurora .liquid-dock-item.mobile-nav-item.pending svg {
+  filter: drop-shadow(0 0 6px rgba(255, 80, 90, .45));
+}
+
+/* Toggle animation in Aurora — the crimson glass is nearly the colour of the
+   dock itself, so the travel also flares the glow and sweeps a sheen across
+   the dock. Both animations are re-declared because `animation` is shorthand. */
+html.aurora .liquid-dock.is-moving .liquid-glass-core {
+  animation:
+    liquidGlassTravel var(--liquid-duration) cubic-bezier(.22, .86, .3, 1) both,
+    auroraGlassFlare var(--liquid-duration) ease-out both;
+}
+@keyframes auroraGlassFlare {
+  0% {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255,100,100,.22),
+      0 0 0 .5px rgba(255,60,60,.1),
+      0 12px 32px rgba(0,0,0,.32);
+  }
+  45% {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255,150,150,.5),
+      0 0 0 1px rgba(255,80,80,.4),
+      0 0 26px rgba(255,60,60,.42),
+      0 12px 32px rgba(0,0,0,.32);
+  }
+  100% {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255,100,100,.22),
+      0 0 0 .5px rgba(255,60,60,.1),
+      0 12px 32px rgba(0,0,0,.32);
+  }
+}
+
+html.aurora .liquid-glass-clip::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,90,90,.14) 50%, transparent 62%);
+  pointer-events: none;
+}
+html.aurora .liquid-dock.is-moving .liquid-glass-clip::after {
+  animation: auroraDockSheen var(--liquid-duration) ease-out both;
+}
+@keyframes auroraDockSheen {
+  0% { opacity: 0; transform: translateX(-55%); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(55%); }
+}
 
 /* Boot loader in Aurora */
 html.aurora .boot-loader { background: #0c0e14; }
@@ -137,6 +189,8 @@ html.aurora .boot-loader { background: #0c0e14; }
 /* Reduced motion — skip canvas fade */
 @media (prefers-reduced-motion: reduce) {
   .aurora-canvas { animation: none; opacity: 1; }
+  html.aurora .liquid-dock.is-moving .liquid-glass-core,
+  html.aurora .liquid-dock.is-moving .liquid-glass-clip::after { animation: none !important; }
 }
 
 /* ── Aurora leaderboard animations ── */

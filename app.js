@@ -94,6 +94,14 @@
       // Re-render only when data actually changed, so animations never restart needlessly.
       if (rerender && state.page !== 'attempt' && dataSnapshot() !== before) render();
     });
+    if (state.role === 'student') {
+      api.myAttempts?.().then(d => {
+        if (!d || !Array.isArray(d.attempts)) return;
+        const before = JSON.stringify(state.myAttempts || []);
+        state.myAttempts = d.attempts;
+        if (rerender && state.page !== 'attempt' && JSON.stringify(state.myAttempts) !== before) render();
+      });
+    }
   }
 
   function refreshPageData(page) {
@@ -228,8 +236,8 @@
     const nav = currentNav().slice(0,5);
     const activeIndex = nav.findIndex(([page]) => page === state.page);
     return `<nav class="mobile-bottom-nav liquid-dock" style="--dock-count:${nav.length};--active-index:${Math.max(0, activeIndex)};--liquid-offset:${Math.max(0, activeIndex) * 100}%" aria-label="Quick navigation">
-      <span class="liquid-glass-indicator ${activeIndex < 0 ? 'is-hidden' : ''}" aria-hidden="true"><i class="liquid-glass-core"></i></span>
-      ${nav.map(([page, navIcon, label], index) => `<button class="mobile-nav-item liquid-dock-item ${state.page === page ? 'active' : ''}" data-page="${page}" data-dock-index="${index}" aria-label="${label}" ${state.page === page ? 'aria-current="page"' : ''}>${icon(navIcon)}<span>${label.split(' ')[0]}</span><i class="dock-tooltip">${label}</i></button>`).join('')}
+      <span class="liquid-glass-clip" aria-hidden="true"><span class="liquid-glass-indicator ${activeIndex < 0 ? 'is-hidden' : ''}"><i class="liquid-glass-core"></i></span></span>
+      ${nav.map(([page, navIcon, label], index) => `<button type="button" class="mobile-nav-item liquid-dock-item ${state.page === page ? 'active' : ''}" data-page="${page}" data-dock-index="${index}" aria-label="${label}" ${state.page === page ? 'aria-current="page"' : ''}>${icon(navIcon)}<span>${label.split(' ')[0]}</span><i class="dock-tooltip">${label}</i></button>`).join('')}
     </nav>`;
   }
 
@@ -265,20 +273,65 @@
     return `<article class="glass-card stat-card" style="--stat-color:${color}"><div class="stat-head"><span class="stat-icon">${icon(statIcon)}</span><span class="stat-trend ${down ? 'down' : ''}">${icon(down?'trending-down':'trending-up')}${trend}</span></div><div class="stat-number">${value}</div><div class="stat-label">${label}</div></article>`;
   }
 
-  function lineChart() {
-    return `<div class="chart-wrap"><svg class="line-chart" viewBox="0 0 700 190" preserveAspectRatio="none" role="img" aria-label="Attempts trend chart">
+  function lineChart(points = [], labels = [], ariaLabel = 'Trend chart') {
+    if (!points.length) return `<div class="chart-wrap" style="display:grid;place-items:center;min-height:150px"><p style="color:var(--muted);font-size:9px">No data yet — this chart fills in after quiz attempts.</p></div>`;
+    if (points.length === 1) { points = [points[0], points[0]]; labels = labels.length ? [labels[0]] : []; }
+    const max = Math.max(...points, 1);
+    const xs = points.map((_, i) => Math.round(i * 700 / (points.length - 1)));
+    const ys = points.map(v => Math.round(178 - (v / max) * 148));
+    const line = xs.map((x, i) => `${i ? 'L' : 'M'}${x},${ys[i]}`).join(' ');
+    const step = labels.length > 8 ? Math.ceil(labels.length / 8) : 1;
+    const shown = labels.filter((_, i) => i % step === 0);
+    return `<div class="chart-wrap"><svg class="line-chart" viewBox="0 0 700 190" preserveAspectRatio="none" role="img" aria-label="${ariaLabel}">
       <defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d57d6" stop-opacity=".28"/><stop offset="1" stop-color="#3d57d6" stop-opacity="0"/></linearGradient></defs>
       <line class="gridline" x1="0" y1="28" x2="700" y2="28"/><line class="gridline" x1="0" y1="78" x2="700" y2="78"/><line class="gridline" x1="0" y1="128" x2="700" y2="128"/><line class="gridline" x1="0" y1="178" x2="700" y2="178"/>
-      <path class="area" d="M0,155 C55,150 65,128 118,132 S188,151 235,113 S320,86 352,104 S425,119 470,75 S548,52 586,69 S655,48 700,30 L700,190 L0,190 Z"/>
-      <path class="line" d="M0,155 C55,150 65,128 118,132 S188,151 235,113 S320,86 352,104 S425,119 470,75 S548,52 586,69 S655,48 700,30"/>
-      <circle class="point" cx="118" cy="132" r="4"/><circle class="point" cx="235" cy="113" r="4"/><circle class="point" cx="352" cy="104" r="4"/><circle class="point" cx="470" cy="75" r="4"/><circle class="point" cx="586" cy="69" r="4"/><circle class="point" cx="700" cy="30" r="4"/>
-    </svg><div class="chart-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>`;
+      <path class="area" d="${line} L700,190 L0,190 Z"/>
+      <path class="line" d="${line}"/>
+      ${xs.map((x, i) => `<circle class="point" cx="${x}" cy="${ys[i]}" r="4"/>`).join('')}
+    </svg>${shown.length ? `<div class="chart-labels">${shown.map(l => `<span>${escapeHTML(l)}</span>`).join('')}</div>` : ''}</div>`;
+  }
+
+  /* --- Derivations from the student's own attempts (served by /api/attempts/mine) --- */
+  const attemptPct = (a) => a.total ? Math.round(a.score / a.total * 100) : 0;
+
+  function lastNDays(attempts, days = 7) {
+    const out = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const day = new Date(); day.setHours(0, 0, 0, 0); day.setDate(day.getDate() - i);
+      const next = new Date(day); next.setDate(day.getDate() + 1);
+      const todays = attempts.filter(a => { const t = new Date(a.when); return t >= day && t < next; });
+      out.push({ label: day.toLocaleDateString([], { weekday: 'short' }), count: todays.length, questions: todays.reduce((s, a) => s + (a.totalQuestions || 0), 0) });
+    }
+    return out;
+  }
+
+  function studyStreak(attempts) {
+    const days = new Set(attempts.map(a => new Date(a.when).toDateString()));
+    let streak = 0;
+    const cursor = new Date();
+    if (!days.has(cursor.toDateString())) cursor.setDate(cursor.getDate() - 1);
+    while (days.has(cursor.toDateString())) { streak++; cursor.setDate(cursor.getDate() - 1); }
+    return streak;
+  }
+
+  function subjectAccuracy(attempts) {
+    const bySub = new Map();
+    for (const a of attempts) {
+      const quiz = state.quizzes.find(q => q.id === a.quizId);
+      const sub = quiz ? quiz.subject : 'Other';
+      if (!bySub.has(sub)) bySub.set(sub, []);
+      bySub.get(sub).push(attemptPct(a));
+    }
+    return [...bySub.entries()]
+      .map(([label, arr]) => [label, Math.round(arr.reduce((s, v) => s + v, 0) / arr.length)])
+      .sort((a, b) => b[1] - a[1]);
   }
 
   const fmtCount = (n) => n >= 1000 ? `${(n/1000).toFixed(1).replace(/\.0$/,'')}k` : String(n);
 
   function teacherDashboard() {
     const s = state.serverStats || {};
+    const weekly = state.serverAnalytics?.weeklyAttempts || [];
     const topQuizzes = state.quizzes.filter(q => q.status === 'Published');
     const mq = (q) => q ? miniQuiz(q, `${q.attempts ?? 0} attempts`, `${q.accuracy ?? 0}%`) : '';
     return `<section class="page dashboard-stack">
@@ -292,7 +345,7 @@
         ${statCard('Average score', s.avgScorePct != null ? `${s.avgScorePct}%` : '0%','gauge','—','#ffbf62')}
       </div>
       <div class="two-column">
-        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Attempts this week</h3><p>Daily submission activity across all quizzes</p></div><div class="chart-legend"><span class="legend-item"><i class="legend-dot"></i>Attempts</span><button class="btn btn-ghost btn-sm">Last 7 days ${icon('chevron-down')}</button></div></div>${lineChart()}</article>
+        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Attempts this week</h3><p>Daily submission activity across all quizzes</p></div><div class="chart-legend"><span class="legend-item"><i class="legend-dot"></i>Attempts</span><span class="chip">Last 7 days</span></div></div>${lineChart(weekly.map(d => d.count), weekly.map(d => d.label), 'Attempts this week chart')}</article>
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Recent activity</h3><p>What’s happening now</p></div><button class="btn btn-ghost btn-sm">View all</button></div><div class="activity-list">
           ${activity('users','green','No activity yet','Student activity will appear here after quiz attempts.','—')}
         </div></article>
@@ -433,16 +486,24 @@
 
   function studentDashboard() {
     const s = state.serverStats || {};
-    const heroQuiz = state.quizzes.find(q => q.status === 'Published') || state.quizzes[0];
-    const smq = (q, a, b) => q ? miniQuiz(q, a, b) : '';
+    const mine = state.myAttempts || [];
+    const streak = studyStreak(mine);
+    const week = lastNDays(mine);
+    const published = state.quizzes.filter(q => q.status === 'Published');
+    const heroQuiz = published[0] || state.quizzes[0];
+    const chrono = [...mine].reverse();
+    const recent = mine.slice(0, 3).map(a => {
+      const q = state.quizzes.find(x => x.id === a.quizId);
+      return q ? miniQuiz(q, new Date(a.when).toLocaleDateString([], { month: 'short', day: 'numeric' }), `${a.score}/${a.total}`) : '';
+    }).join('');
     return `<section class="page dashboard-stack">
-      <article class="hero-card"><div class="hero-copy"><span class="hero-kicker"><i></i>7 day streak</span><h2>Hey ${escapeHTML(currentPerson().first)}, ready to <span>level up?</span></h2><p>A fresh Java challenge is waiting. You’re only 8 points away from entering today’s top three.</p><div class="hero-actions"><button class="btn btn-primary" data-action="start-quiz" data-id="${heroQuiz ? heroQuiz.id : 'java-5'}">${icon('play')}Continue learning</button><button class="btn btn-secondary" data-page="library">${icon('library-big')}Explore library</button></div></div>${mascot()}</article>
+      <article class="hero-card"><div class="hero-copy"><span class="hero-kicker"><i></i>${streak ? `${streak} day streak` : 'Ready when you are'}</span><h2>Hey ${escapeHTML(currentPerson().first)}, ready to <span>level up?</span></h2><p>${published.length ? `${published.length} quiz${published.length === 1 ? ' is' : 'zes are'} live right now. Every attempt updates your rank instantly.` : 'New quizzes will appear here as soon as your teacher publishes them.'}</p><div class="hero-actions">${heroQuiz ? `<button class="btn btn-primary" data-action="start-quiz" data-id="${heroQuiz.id}">${icon('play')}Continue learning</button>` : ''}<button class="btn btn-secondary" data-page="library">${icon('library-big')}Explore library</button></div></div>${mascot()}</article>
       <div class="stats-grid">${statCard('Quizzes completed', s.completed != null ? String(s.completed) : '0','circle-check-big','—','#4d94ff')}${statCard('Average score', s.avgScorePct != null ? `${s.avgScorePct}%` : '0%','gauge','—','#4de3a3')}${statCard('Current rank', s.rank != null ? `#${s.rank}` : '—','trophy','—','#ffbf62')}${statCard('Learning time', s.learningHours != null ? `${s.learningHours}h` : '0h','clock-3','—','#55d9ff')}</div>
       <div class="two-column">
         <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Recommended for you</h3><p>Based on your recent practice</p></div><button class="btn btn-ghost btn-sm" data-page="library">See all ${icon('arrow-right')}</button></div><div class="quiz-grid">${state.quizzes.filter(q=>q.status==='Published').slice(0,2).map(q=>quizCard(q,true)).join('')}</div></article>
-        <div class="dashboard-stack"><article class="glass-card streak-card"><span class="streak-flame">${icon('flame')}</span><span class="streak-copy"><strong>7 days</strong><span>Your longest streak is 12 days</span></span><div class="week-dots">${['M','T','W','T','F','S','S'].map((d,i)=>`<span class="day-dot done"><i>${i<6?icon('check'):''}</i>${d}</span>`).join('')}</div></article><article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Quick performance</h3><p>Your last five attempts</p></div><div class="progress-ring" style="--value:${s.avgScorePct != null ? s.avgScorePct : 84};width:64px"><span style="font-size:13px">${s.avgScorePct != null ? s.avgScorePct : 84}<small>%</small></span></div></div><div class="mini-quiz-list">${smq(state.quizzes[0],'Yesterday','46/50')}${smq(state.quizzes[3],'Jul 15','42/50')}${smq(state.quizzes[5],'Jul 10','27/30')}</div></article></div>
+        <div class="dashboard-stack"><article class="glass-card streak-card"><span class="streak-flame">${icon('flame')}</span><span class="streak-copy"><strong>${streak} day${streak === 1 ? '' : 's'}</strong><span>${streak ? 'Keep it going — one quiz a day.' : 'Attempt a quiz to start a streak.'}</span></span><div class="week-dots">${week.map(d => `<span class="day-dot ${d.count ? 'done' : ''}"><i>${d.count ? icon('check') : ''}</i>${d.label[0]}</span>`).join('')}</div></article><article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Quick performance</h3><p>Your recent attempts</p></div><div class="progress-ring" style="--value:${s.avgScorePct ?? 0};width:64px"><span style="font-size:13px">${s.avgScorePct ?? 0}<small>%</small></span></div></div><div class="mini-quiz-list">${recent || `<p style="color:var(--muted);font-size:9px;padding:10px 0">No attempts yet — your recent scores will appear here.</p>`}</div></article></div>
       </div>
-      <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Your weekly momentum</h3><p>Accuracy across this week’s practice</p></div><button class="btn btn-secondary btn-sm" data-page="performance">Full report ${icon('arrow-up-right')}</button></div>${lineChart()}</article>
+      <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Your weekly momentum</h3><p>Accuracy across your recent attempts</p></div><button class="btn btn-secondary btn-sm" data-page="performance">Full report ${icon('arrow-up-right')}</button></div>${lineChart(chrono.map(attemptPct), chrono.map(a => new Date(a.when).toLocaleDateString([], { month: 'short', day: 'numeric' })), 'Accuracy trend chart')}</article>
     </section>`;
   }
 
@@ -462,14 +523,37 @@
   }
 
   function performancePage() {
+    const s = state.serverStats || {};
+    const mine = state.myAttempts || [];
+    if (!mine.length) {
+      return `<section class="page">
+      <div class="page-head"><div><span class="eyebrow">My progress</span><h2>Small wins, visible growth.</h2><p>Understand your strengths and decide what to practice next.</p></div></div>
+      <div class="glass-card empty-state">${emptyToy()}<h3>No performance data yet</h3><p>Attempt your first quiz and your accuracy, subjects, and weekly practice will appear here.</p><button class="btn btn-primary" data-page="library">${icon('library-big')}Browse quizzes</button></div>
+    </section>`;
+    }
+    const chrono = [...mine].reverse();
+    const accuracySeries = chrono.map(attemptPct);
+    const chartLabels = chrono.map(a => new Date(a.when).toLocaleDateString([], { month: 'short', day: 'numeric' }));
+    const overall = s.avgScorePct ?? Math.round(accuracySeries.reduce((sum, v) => sum + v, 0) / accuracySeries.length);
+    const solved = mine.reduce((sum, a) => sum + (a.totalQuestions || 0), 0);
+    const subjects = subjectAccuracy(mine);
+    const best = subjects[0];
+    const streak = studyStreak(mine);
+    const week = lastNDays(mine);
+    const maxQ = Math.max(...week.map(d => d.questions), 1);
+    const palette = ['#4d94ff', '#9c8cff', '#55d9ff', '#4de3a3', '#ffbf62'];
+    const now = new Date();
+    const monthQuestions = mine.filter(a => { const t = new Date(a.when); return t.getMonth() === now.getMonth() && t.getFullYear() === now.getFullYear(); }).reduce((sum, a) => sum + (a.totalQuestions || 0), 0);
+    const goal = 120;
+    const goalPct = Math.min(100, Math.round(monthQuestions / goal * 100));
     return `<section class="page">
-      <div class="page-head"><div><span class="eyebrow">My progress</span><h2>Small wins, visible growth.</h2><p>Understand your strengths and decide what to practice next.</p></div><div class="page-actions"><button class="btn btn-secondary">${icon('calendar-days')}Last 6 months</button><button class="btn btn-primary" data-action="share-progress">${icon('share-2')}Share report</button></div></div>
-      <div class="stats-grid">${statCard('Overall accuracy','84%','crosshair','4.2%','#4d94ff')}${statCard('Questions solved','486','list-checks','38','#4de3a3')}${statCard('Best subject','Java','code-2','91%','#ffbf62')}${statCard('Study streak','7 days','flame','2 days','#ff7d91')}</div>
+      <div class="page-head"><div><span class="eyebrow">My progress</span><h2>Small wins, visible growth.</h2><p>Understand your strengths and decide what to practice next.</p></div><div class="page-actions"><button class="btn btn-primary" data-action="share-progress">${icon('share-2')}Share report</button></div></div>
+      <div class="stats-grid">${statCard('Overall accuracy',`${overall}%`,'crosshair','—','#4d94ff')}${statCard('Questions solved',String(solved),'list-checks','—','#4de3a3')}${statCard('Best subject',best ? escapeHTML(best[0]) : '—','code-2',best ? `${best[1]}%` : '—','#ffbf62')}${statCard('Study streak',`${streak} day${streak===1?'':'s'}`,'flame','—','#ff7d91')}</div>
       <div class="two-column">
-        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Performance history</h3><p>Monthly average accuracy</p></div><div class="chart-legend"><span class="legend-item"><i class="legend-dot"></i>Your accuracy</span></div></div>${lineChart()}</article>
-        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Subject-wise progress</h3><p>Accuracy by learning area</p></div>${icon('ellipsis')}</div><div style="display:grid;gap:17px">${progressRow('Java',91,'#4d94ff')}${progressRow('DSA',78,'#9c8cff')}${progressRow('DBMS',85,'#55d9ff')}${progressRow('Networks',76,'#4de3a3')}${progressRow('Operating Systems',69,'#ffbf62')}</div></article>
+        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Performance history</h3><p>Accuracy across your last ${mine.length} attempt${mine.length===1?'':'s'}</p></div><div class="chart-legend"><span class="legend-item"><i class="legend-dot"></i>Your accuracy</span></div></div>${lineChart(accuracySeries, chartLabels, 'Accuracy history chart')}</article>
+        <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Subject-wise progress</h3><p>Average accuracy by learning area</p></div>${icon('ellipsis')}</div><div style="display:grid;gap:17px">${subjects.slice(0,5).map(([label,value],i)=>progressRow(escapeHTML(label),value,palette[i%palette.length])).join('')}</div></article>
       </div>
-      <div class="two-column" style="margin-top:14px"><article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Weekly practice</h3><p>Questions completed per day</p></div><span class="chip published">Goal on track</span></div><div class="bar-chart">${[['Mon',12],['Tue',21],['Wed',16],['Thu',28],['Fri',24],['Sat',34],['Sun',19]].map(([l,v],i)=>`<div class="bar-group"><span class="bar-value">${v}</span><i class="bar" style="height:${v*2.5}%;animation-delay:${i*.06}s"></i><span class="bar-label">${l}</span></div>`).join('')}</div></article><article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Learning goal</h3><p>July · 120 questions</p></div><strong style="font-family:'DM Mono';font-size:11px">92 / 120</strong></div><div style="display:flex;align-items:center;justify-content:center;padding:13px"><div class="progress-ring" style="--value:77;width:130px"><span style="font-size:23px">77<small>%</small></span></div></div><p style="margin:4px 0 0;text-align:center;color:var(--muted);font-size:8px">28 more questions to complete your monthly goal.</p></article></div>
+      <div class="two-column" style="margin-top:14px"><article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Weekly practice</h3><p>Questions completed per day</p></div><span class="chip published">Last 7 days</span></div><div class="bar-chart">${week.map((d,i)=>`<div class="bar-group"><span class="bar-value">${d.questions}</span><i class="bar" style="height:${Math.round(d.questions/maxQ*100)}%;animation-delay:${i*.06}s"></i><span class="bar-label">${d.label}</span></div>`).join('')}</div></article><article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Learning goal</h3><p>${now.toLocaleDateString([], { month: 'long' })} · ${goal} questions</p></div><strong style="font-family:'DM Mono';font-size:11px">${monthQuestions} / ${goal}</strong></div><div style="display:flex;align-items:center;justify-content:center;padding:13px"><div class="progress-ring" style="--value:${goalPct};width:130px"><span style="font-size:23px">${goalPct}<small>%</small></span></div></div><p style="margin:4px 0 0;text-align:center;color:var(--muted);font-size:8px">${monthQuestions >= goal ? 'Goal complete — set your sights higher!' : `${goal - monthQuestions} more questions to complete your monthly goal.`}</p></article></div>
     </section>`;
   }
 
@@ -710,22 +794,36 @@
     api.logout().catch(() => null).finally(clearSession);
   }
 
+  const DOCK_TRAVEL_MS = 320;
+
   function navigateDock(target) {
     const dock = target.closest('.liquid-dock');
     if (!dock || target.classList.contains('active') || dock.dataset.animating === 'true') return;
-    const targetIndex = Number(target.dataset.dockIndex || 0);
-    dock.dataset.animating = 'true';
-    dock.style.setProperty('--liquid-offset', `${targetIndex * 100}%`);
-    dock.classList.add('is-moving');
-    $('.liquid-dock-item', dock).forEach(item => item.classList.toggle('pending', item === target));
 
-    window.setTimeout(() => {
-      state.page = target.dataset.page;
+    const page = target.dataset.page;
+    const commit = () => {
+      dock.dataset.animating = 'false';
+      state.page = page;
       state.sidebarOpen = false;
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      refreshPageData(state.page);
-    }, 320);
+      refreshPageData(page);
+    };
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) { commit(); return; }
+
+    const targetIndex = Number(target.dataset.dockIndex) || 0;
+    dock.dataset.animating = 'true';
+    // Slide the liquid indicator to the tapped slot, then swap the page once it lands.
+    dock.style.setProperty('--liquid-offset', `${targetIndex * 100}%`);
+    dock.classList.remove('is-moving');
+    void dock.offsetWidth; // restart the squish keyframes on repeat taps
+    dock.classList.add('is-moving');
+    $('.liquid-glass-indicator', dock)?.classList.remove('is-hidden');
+    $$('.liquid-dock-item', dock).forEach(item => item.classList.toggle('pending', item === target));
+
+    window.setTimeout(commit, DOCK_TRAVEL_MS);
   }
   document.addEventListener('click', event => {
     const pageTarget=event.target.closest('[data-page]');
@@ -867,9 +965,13 @@
   });
 
   // Public utilities consumed by the separately loaded code-practice module.
-  window.UzoneAppBridge = { state, render, escapeHTML, icon, runIcons, toast };
+  window.UzoneAppBridge = { state, render, escapeHTML, icon, runIcons, toast, showModal, closeModal, persist };
 
-  window.addEventListener('error', () => toast('Something went wrong','Your work is safe. Please try that action again.','triangle-alert'));
+  window.addEventListener('error', (event) => {
+    // Surface the cause in the console — the toast alone hides what actually broke.
+    console.error('[UzoneQuiz]', event.error || event.message);
+    toast('Something went wrong','Your work is safe. Please try that action again.','triangle-alert');
+  });
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   render();
   loadFromServer();

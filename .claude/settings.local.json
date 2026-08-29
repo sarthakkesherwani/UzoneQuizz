@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"const \\\\$\\\\|function \\\\$\\\\|\\\\$\\\\$ *=\" app.js)",
+      "Bash(node -e ' *)",
+      "Bash(node --check coding-native.js)",
+      "WebFetch(domain:reactbits.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch"
+    ]
+  }
+}

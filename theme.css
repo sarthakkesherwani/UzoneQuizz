@@ -554,7 +554,6 @@ html.dark .mobile-bottom-nav { background: rgba(29,32,39,.92); border-color: var
 .page { padding-bottom: 112px; }
 
 .mobile-bottom-nav.liquid-dock {
-  display: none;
   --dock-count: 5;
   --liquid-offset: 0%;
   --liquid-duration: 320ms;
@@ -567,7 +566,7 @@ html.dark .mobile-bottom-nav { background: rgba(29,32,39,.92); border-color: var
   height: 70px;
   padding: 7px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--dock-count, 5), minmax(0, 1fr));
   gap: 0;
   border: 1px solid rgba(255, 255, 255, .62);
   border-radius: 24px;
@@ -583,8 +582,9 @@ html.dark .mobile-bottom-nav { background: rgba(29,32,39,.92); border-color: var
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   transform: translateX(-50%);
   isolation: isolate;
-  /* Keep the refraction and travel animation inside the rounded dock. */
-  overflow: hidden;
+  /* Tooltips escape upward, so the dock itself must not clip.
+     The travel animation is clipped by .liquid-glass-clip instead. */
+  overflow: visible;
 }
 
 html.dark .mobile-bottom-nav.liquid-dock {
@@ -612,12 +612,23 @@ html.dark .mobile-bottom-nav.liquid-dock {
   pointer-events: none;
 }
 
+/* Keeps the refraction and travel squish inside the dock's rounded shape
+   without clipping the hover tooltips that sit above the dock. */
+.liquid-glass-clip {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 23px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .liquid-glass-indicator {
   position: absolute;
   z-index: 0;
   left: 7px;
   top: 7px;
-  width: calc(20% - 2.8px);
+  width: calc((100% - 14px) / var(--dock-count, 5));
   height: 56px;
   padding: 2px;
   pointer-events: none;
@@ -626,7 +637,6 @@ html.dark .mobile-bottom-nav.liquid-dock {
     transform var(--liquid-duration) cubic-bezier(.22, .86, .3, 1),
     opacity .2s ease;
   will-change: transform;
-  contain: layout paint;
 }
 .liquid-glass-indicator.is-hidden { opacity: 0; }
 
@@ -744,6 +754,23 @@ html.dark .liquid-dock-item.mobile-nav-item.pending { color: #f0f2ff; }
   transform: translateY(-1px) scale(1.08);
   filter: drop-shadow(0 3px 5px rgba(61,87,214,.18));
 }
+.liquid-dock-item.mobile-nav-item:active { transform: scale(.93); }
+/* Icon pops while the glass indicator travels to the tapped slot. */
+.liquid-dock-item.mobile-nav-item.pending svg {
+  animation: dockIconPop var(--liquid-duration) cubic-bezier(.2, .8, .2, 1);
+}
+.liquid-dock-item.mobile-nav-item.pending > span {
+  animation: dockLabelIn var(--liquid-duration) ease;
+}
+@keyframes dockIconPop {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-5px) scale(1.2); }
+  100% { transform: translateY(-1px) scale(1.08); }
+}
+@keyframes dockLabelIn {
+  0% { opacity: .5; transform: translateY(2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 
 .dock-tooltip {
   position: absolute;
@@ -772,7 +799,6 @@ html.dark .dock-tooltip { color: var(--text); border-color: var(--line); backgro
 @media (max-width: 720px) {
   .page { padding-bottom: 102px; }
   .mobile-bottom-nav.liquid-dock {
-    display: grid;
     left: 50%;
     right: auto;
     bottom: max(10px, env(safe-area-inset-bottom));
@@ -785,4 +811,6 @@ html.dark .dock-tooltip { color: var(--text); border-color: var(--line); backgro
 @media (prefers-reduced-motion: reduce) {
   .liquid-glass-indicator { transition-duration: .01ms; }
   .liquid-dock.is-moving .liquid-glass-core { animation: none !important; }
+  .liquid-dock-item.mobile-nav-item.pending svg,
+  .liquid-dock-item.mobile-nav-item.pending > span { animation: none !important; }
 }

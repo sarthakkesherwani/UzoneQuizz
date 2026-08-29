@@ -93,6 +93,17 @@ async function buildAnalytics(db) {
     .sort((a, b) => b.pctWrong - a.pctWrong)
     .slice(0, 4);
 
+  // Attempts per day over the last 7 days, for the dashboard trend chart.
+  const weeklyAttempts = [];
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(); day.setHours(0, 0, 0, 0); day.setDate(day.getDate() - i);
+    const next = new Date(day); next.setDate(day.getDate() + 1);
+    weeklyAttempts.push({
+      label: day.toLocaleDateString('en-US', { weekday: 'short' }),
+      count: attempts.filter(a => { const t = new Date(a.createdAt); return t >= day && t < next; }).length,
+    });
+  }
+
   return {
     totalQuizzes: quizzes.length,
     totalAttempts: attempts.length,
@@ -100,7 +111,7 @@ async function buildAnalytics(db) {
     accuracyPct: Math.round(accuracy * 10) / 10,
     completionPct: Math.round(completion * 10) / 10,
     avgTime: fmtTime(avgTimeSec).replace(':', 'm ') + 's',
-    quizAccuracy, subjectDist, hardestQuestions,
+    quizAccuracy, subjectDist, hardestQuestions, weeklyAttempts,
   };
 }
 

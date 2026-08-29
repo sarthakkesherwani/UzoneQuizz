@@ -74,6 +74,7 @@
     deleteQuiz(id) { return quiet(req('DELETE', `/api/quizzes/${encodeURIComponent(id)}`)); },
 
     submitAttempt(payload) { return quiet(req('POST', '/api/attempts', payload)); },
+    myAttempts() { return quiet(req('GET', '/api/attempts/mine')); },
     leaderboard(quizId) {
       const qs = quizId ? `?quizId=${encodeURIComponent(quizId)}` : '';
       return quiet(req('GET', `/api/leaderboard${qs}`));
