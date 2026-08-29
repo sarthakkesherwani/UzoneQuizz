@@ -707,12 +707,21 @@
   }
 
   function navigateDock(target) {
-    if (target.classList.contains('active')) return;
-    state.page = target.dataset.page;
-    state.sidebarOpen = false;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    refreshPageData(state.page);
+    const dock = target.closest('.liquid-dock');
+    if (!dock || target.classList.contains('active') || dock.dataset.animating === 'true') return;
+    const targetIndex = Number(target.dataset.dockIndex || 0);
+    dock.dataset.animating = 'true';
+    dock.style.setProperty('--liquid-offset', `${targetIndex * 100}%`);
+    dock.classList.add('is-moving');
+    $('.liquid-dock-item', dock).forEach(item => item.classList.toggle('pending', item === target));
+
+    window.setTimeout(() => {
+      state.page = target.dataset.page;
+      state.sidebarOpen = false;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      refreshPageData(state.page);
+    }, 320);
   }
   document.addEventListener('click', event => {
     const pageTarget=event.target.closest('[data-page]');
