@@ -853,6 +853,9 @@
     scene.style.setProperty('--scene-rx', `${-2 - y * 9}deg`);
   });
 
+  // Public utilities consumed by the separately loaded code-practice module.
+  window.UzoneAppBridge = { state, render, escapeHTML, icon, runIcons, toast };
+
   window.addEventListener('error', () => toast('Something went wrong','Your work is safe. Please try that action again.','triangle-alert'));
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   render();
