@@ -556,6 +556,7 @@ html.dark .mobile-bottom-nav { background: rgba(29,32,39,.92); border-color: var
 .mobile-bottom-nav.liquid-dock {
   --dock-count: 5;
   --liquid-offset: 0%;
+  --liquid-duration: 320ms;
   position: fixed;
   z-index: 74;
   left: 50%;
@@ -618,14 +619,13 @@ html.dark .mobile-bottom-nav.liquid-dock {
   width: calc(20% - 2.8px);
   height: 56px;
   padding: 2px;
-  pointer-events: auto;
-  cursor: grab;
-  touch-action: none;
+  pointer-events: none;
   transform: translate3d(var(--liquid-offset), 0, 0);
   transition:
-    transform .43s cubic-bezier(.22, .92, .28, 1),
+    transform var(--liquid-duration) cubic-bezier(.22, .86, .3, 1),
     opacity .2s ease;
   will-change: transform;
+  contain: layout paint;
 }
 .liquid-glass-indicator.is-hidden { opacity: 0; }
 
@@ -690,13 +690,13 @@ html.dark .liquid-glass-core {
 }
 
 .liquid-dock.is-moving .liquid-glass-core {
-  animation: liquidGlassTravel .43s cubic-bezier(.22,.8,.25,1) both;
+  animation: liquidGlassTravel var(--liquid-duration) cubic-bezier(.22,.86,.3,1) both;
 }
 @keyframes liquidGlassTravel {
-  0% { transform: scale3d(1,1,1); border-radius: 19px; filter: saturate(1); }
-  38% { transform: scale3d(1.32,.84,1); border-radius: 24px 14px 14px 24px; filter: saturate(1.15); }
-  72% { transform: scale3d(.91,1.08,1); border-radius: 15px 22px 22px 15px; }
-  100% { transform: scale3d(1,1,1); border-radius: 19px; filter: saturate(1); }
+  0% { transform: scale3d(1,1,1); border-radius: 19px; }
+  42% { transform: scale3d(1.14,.94,1); border-radius: 21px 17px 17px 21px; }
+  74% { transform: scale3d(.98,1.02,1); border-radius: 18px 20px 20px 18px; }
+  100% { transform: scale3d(1,1,1); border-radius: 19px; }
 }
 
 .liquid-dock-item.mobile-nav-item {
