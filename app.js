@@ -706,44 +706,18 @@
     api.logout().catch(() => null).finally(clearSession);
   }
 
-  function animateDockNavigation(target) {
-    const dock = target.closest('.liquid-dock');
-    if (!dock || target.classList.contains('active') || dock.dataset.animating === 'true') return;
-    const targetIndex = Number(target.dataset.dockIndex || 0);
-    const indicator = dock.querySelector('.liquid-glass-indicator');
-    const currentItem = dock.querySelector('.liquid-dock-item.active');
-    const currentIndex = Number(currentItem?.dataset.dockIndex || 0);
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    dock.dataset.animating = 'true';
-    indicator?.classList.remove('is-hidden');
-    dock.style.setProperty('--liquid-offset', `${targetIndex * 100}%`);
-    if (indicator && !reducedMotion) {
-      indicator.getAnimations().forEach(animation => animation.cancel());
-      indicator.animate([
-        { transform: `translate3d(${currentIndex * 100}%, 0, 0)` },
-        { transform: `translate3d(${targetIndex * 100}%, 0, 0)` }
-      ], {
-        duration: 430,
-        easing: 'cubic-bezier(.22, .92, .28, 1)',
-        fill: 'forwards'
-      });
-    }
-    dock.classList.add('is-moving');
-    $$('.liquid-dock-item', dock).forEach(item => item.classList.toggle('pending', item === target));
-    window.setTimeout(() => {
-      state.page = target.dataset.page;
-      state.sidebarOpen = false;
-      render();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      refreshPageData(state.page);
-    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 430);
+  function navigateDock(target) {
+    if (target.classList.contains('active')) return;
+    state.page = target.dataset.page;
+    state.sidebarOpen = false;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    refreshPageData(state.page);
   }
   document.addEventListener('click', event => {
     const pageTarget=event.target.closest('[data-page]');
     if (pageTarget) {
-      // Suppress the click produced when a glass drag ends.
-      if (_glassDragDidDrag) { _glassDragDidDrag = false; event.preventDefault(); return; }
-      if (pageTarget.classList.contains('liquid-dock-item')) { animateDockNavigation(pageTarget); return; }
+      if (pageTarget.classList.contains('liquid-dock-item')) { navigateDock(pageTarget); return; }
       state.page=pageTarget.dataset.page; state.sidebarOpen=false; render(); window.scrollTo({top:0,behavior:'smooth'}); refreshPageData(state.page); return;
     }
     const target=event.target.closest('[data-action]');
