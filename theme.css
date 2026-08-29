@@ -628,8 +628,6 @@ html.dark .mobile-bottom-nav.liquid-dock {
   will-change: transform;
 }
 .liquid-glass-indicator.is-hidden { opacity: 0; }
-.liquid-glass-indicator.is-dragging { cursor: grabbing; transition: none; }
-.liquid-glass-indicator.is-dragging .liquid-glass-core { transform: scale(1.04); }
 
 .liquid-glass-core {
   position: relative;
