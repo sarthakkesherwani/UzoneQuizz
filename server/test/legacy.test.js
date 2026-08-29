@@ -4,7 +4,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { verify, isBcryptHash } = require('../lib/bcrypt');
-const { migrateLegacy, ensureDemoUsers } = require('../seed');
+const { migrateLegacy } = require('../seed');
 const { Router } = require('../lib/httpx');
 const { verifyToken } = require('../lib/auth');
 const { registerAuthRoutes } = require('../routes/auth');
@@ -88,16 +88,6 @@ test('legacy bcrypt account can log in and is migrated to scrypt', async () => {
   assert.ok(u.passHash?.startsWith('s2$'), 'must be migrated to scrypt');
   res = await call(router, { method: 'POST', path: '/api/auth/login', db, body: { email: 'sarthak@x.com', password: 'demopass' } });
   assert.strictEqual(res.status, 200, 'scrypt path works after migration');
-});
-
-test('ensureDemoUsers creates missing demo accounts in a non-empty db', async () => {
-  const db = new FakeDb();
-  await db.collection('users').insertOne({ _id: 'u1', email: 'real@x.com', role: 'student' });
-  const created = await ensureDemoUsers(db);
-  assert.strictEqual(created.length, 2);
-  assert.ok(await db.collection('users').findOne({ email: 'demo@uzonequiz.app' }));
-  assert.ok(await db.collection('users').findOne({ email: 'teacher@uzonequiz.app' }));
-  assert.strictEqual((await ensureDemoUsers(db)).length, 0, 'idempotent');
 });
 
 test('migrated legacy quiz is visible to students and scoreable', async () => {

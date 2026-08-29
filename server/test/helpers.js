@@ -6,19 +6,44 @@ function matches(doc, filter) {
   return Object.entries(filter).every(([k, v]) => doc[k] === v);
 }
 
-class FakeCollection {
-  constructor() { this.docs = []; }
-  async find(filter = {}, { sort, limit, projection } = {}) {
-    let out = this.docs.filter(d => matches(d, filter)).map(d => ({ ...d }));
-    if (sort) {
-      const [[key, dir]] = Object.entries(sort);
-      out.sort((a, b) => (a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0) * dir);
+const applyProjection = (doc, projection) =>
+  Object.fromEntries(Object.keys(projection).filter(k => projection[k]).map(k => [k, doc[k]]));
+
+/* Mirrors the real driver's FindCursor chain: sort/limit/project/toArray. */
+class FakeCursor {
+  constructor(docs, { sort, limit, projection } = {}) {
+    this._docs = docs;
+    this._sort = sort || null;
+    this._limit = limit || 0;
+    this._projection = projection || null;
+  }
+  sort(spec) { this._sort = spec; return this; }
+  limit(n) { this._limit = n; return this; }
+  project(projection) { this._projection = projection; return this; }
+  async toArray() {
+    let out = this._docs;
+    if (this._sort) {
+      const entries = Object.entries(this._sort);
+      out = [...out].sort((a, b) => {
+        for (const [key, dir] of entries) {
+          if (a[key] > b[key]) return dir;
+          if (a[key] < b[key]) return -dir;
+        }
+        return 0;
+      });
     }
-    if (limit) out = out.slice(0, limit);
-    if (projection) out = out.map(d => Object.fromEntries(Object.keys(projection).filter(k => projection[k]).map(k => [k, d[k]])));
+    if (this._limit) out = out.slice(0, this._limit);
+    if (this._projection) out = out.map(d => applyProjection(d, this._projection));
     return out;
   }
-  async findOne(filter, opts) { return (await this.find(filter, { ...opts, limit: 1 }))[0] || null; }
+}
+
+class FakeCollection {
+  constructor() { this.docs = []; }
+  find(filter = {}, opts = {}) {
+    return new FakeCursor(this.docs.filter(d => matches(d, filter)).map(d => ({ ...d })), opts);
+  }
+  async findOne(filter, opts = {}) { return (await this.find(filter, { ...opts, limit: 1 }).toArray())[0] || null; }
   async insertOne(doc) { this.docs.push({ ...doc }); return { insertedId: doc._id }; }
   async insertMany(docs) { docs.forEach(d => this.docs.push({ ...d })); return {}; }
   async updateOne(filter, update, { upsert = false } = {}) {

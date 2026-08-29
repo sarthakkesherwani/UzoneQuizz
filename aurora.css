@@ -138,3 +138,73 @@ html.aurora .boot-loader { background: #0c0e14; }
 @media (prefers-reduced-motion: reduce) {
   .aurora-canvas { animation: none; opacity: 1; }
 }
+
+/* ── Aurora leaderboard animations ── */
+
+/* Podium cards rise out of a soft blur, staggered left to right */
+html.aurora .podium-card {
+  animation: auroraPodiumIn .7s cubic-bezier(.22, 1, .36, 1) backwards;
+}
+html.aurora .podium-card.rank-2 { animation-delay: .1s; }
+html.aurora .podium-card.rank-3 { animation-delay: .18s; }
+
+/* The champion card keeps a slow crimson glow after entering */
+html.aurora .podium-card.rank-1 {
+  animation:
+    auroraPodiumIn .7s cubic-bezier(.22, 1, .36, 1) backwards,
+    auroraChampionGlow 3.4s ease-in-out 1.1s infinite;
+}
+
+@keyframes auroraPodiumIn {
+  from { opacity: 0; transform: translateY(22px) scale(.95); filter: blur(3px); }
+}
+
+@keyframes auroraChampionGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(255, 68, 85, 0), 0 18px 52px rgba(0, 0, 0, .5); }
+  50% { box-shadow: 0 0 30px rgba(255, 68, 85, .3), 0 18px 52px rgba(0, 0, 0, .5); }
+}
+
+/* Medals float gently, offset per podium step */
+html.aurora .podium-card .podium-medal {
+  display: inline-block;
+  animation: auroraMedalFloat 3s ease-in-out infinite;
+}
+html.aurora .podium-card.rank-2 .podium-medal { animation-delay: .4s; }
+html.aurora .podium-card.rank-3 .podium-medal { animation-delay: .8s; }
+
+@keyframes auroraMedalFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Rank rows cascade in one after another (--rank-i set inline per row) */
+html.aurora .rank-item {
+  animation: auroraRankIn .5s ease backwards;
+  animation-delay: calc(.2s + var(--rank-i, 0) * 60ms);
+}
+
+@keyframes auroraRankIn {
+  from { opacity: 0; transform: translateX(-14px); }
+}
+
+/* Your own row pulses softly so it is easy to find */
+html.aurora .rank-item.me {
+  border-color: rgba(255, 68, 85, .35);
+  animation:
+    auroraRankIn .5s ease backwards,
+    auroraMePulse 2.8s ease-in-out 1s infinite;
+  animation-delay: calc(.2s + var(--rank-i, 0) * 60ms), 1s;
+}
+
+@keyframes auroraMePulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(255, 68, 85, 0); }
+  50% { box-shadow: 0 0 18px rgba(255, 68, 85, .22); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.aurora .podium-card,
+  html.aurora .podium-card.rank-1,
+  html.aurora .podium-card .podium-medal,
+  html.aurora .rank-item,
+  html.aurora .rank-item.me { animation: none; }
+}

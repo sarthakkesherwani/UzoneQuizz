@@ -142,7 +142,7 @@ test('quiz upsert, student visibility, and delete', async () => {
 
 test('publishing notifies students', async () => {
   await call(router, { method: 'POST', path: '/api/quizzes', db, user: teacher, actingRole: 'teacher', body: quizPayload() });
-  const notes = await db.collection('notifications').find({ userId: 's1' });
+  const notes = await db.collection('notifications').find({ userId: 's1' }).toArray();
   assert.strictEqual(notes.length, 1);
   assert.match(notes[0].body, /Test Quiz/);
 });

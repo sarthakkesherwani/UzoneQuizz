@@ -102,7 +102,8 @@ function registerAuthRoutes(router, { db, cfg, verifyToken: verify }) {
   router.post('/api/auth/role', async (ctx) => {
     const wantedRole = ctx.body.role === 'teacher' ? 'teacher' : 'student';
     if (!ctx.authed) throw new HttpError(401, 'Authentication required');
-    const actingRole = ctx.user.role;
+    // Demo accounts may act in either role; real accounts keep their own.
+    const actingRole = ctx.user.isDemo ? wantedRole : ctx.user.role;
     sendJson(ctx.res, 200, issue(ctx.user, actingRole));
   });
 

@@ -43,7 +43,7 @@ async function refreshQuizCounters(db, quizId) {
 }
 
 async function notifyStudents(db, { icon, title, body }) {
-  const students = await db.collection('users').find({ role: 'student' }, { projection: { _id: 1 } });
+  const students = await db.collection('users').find({ role: 'student' }).project({ _id: 1 }).toArray();
   if (!students.length) return;
   await db.collection('notifications').insertMany(students.map(s => ({
     _id: uid(), userId: s._id, icon, title, body, read: false, createdAt: new Date(),
@@ -53,7 +53,7 @@ async function notifyStudents(db, { icon, title, body }) {
 function registerContentRoutes(router, { db }) {
   router.get('/api/quizzes', async (ctx) => {
     const filter = ctx.actingRole === 'teacher' ? {} : { status: 'Published' };
-    const docs = await db.collection('quizzes').find(filter, { sort: { createdAt: -1 } });
+    const docs = await db.collection('quizzes').find(filter).sort({ createdAt: -1 }).toArray();
     sendJson(ctx.res, 200, { quizzes: docs.map(toQuiz) });
   });
 
@@ -135,7 +135,7 @@ function registerContentRoutes(router, { db }) {
 
   router.get('/api/attempts/mine', async (ctx) => {
     if (!ctx.user) { sendJson(ctx.res, 200, { attempts: [] }); return; }
-    const docs = await db.collection('attempts').find({ userId: ctx.user._id }, { sort: { createdAt: -1 }, limit: 20 });
+    const docs = await db.collection('attempts').find({ userId: ctx.user._id }).sort({ createdAt: -1 }).limit(20).toArray();
     sendJson(ctx.res, 200, {
       attempts: docs.map(a => ({ quizId: a.quizId, score: a.score, total: a.total, correct: a.correct, totalQuestions: a.totalQuestions, time: fmtTime(a.timeTakenSec), when: a.createdAt })),
     });
@@ -144,7 +144,7 @@ function registerContentRoutes(router, { db }) {
   router.get('/api/leaderboard', async (ctx) => {
     let quizId = ctx.query.quizId;
     if (!quizId) {
-      const published = await db.collection('quizzes').find({ status: 'Published', leaderboard: true });
+      const published = await db.collection('quizzes').find({ status: 'Published', leaderboard: true }).toArray();
       published.sort((a, b) => (b.attempts || 0) - (a.attempts || 0));
       quizId = published[0]?._id;
     }

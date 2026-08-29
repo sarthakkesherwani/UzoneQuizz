@@ -476,15 +476,19 @@
   function progressRow(label,value,color) { return `<div><div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:7px"><strong>${label}</strong><span style="font-family:'DM Mono';color:var(--muted)">${value}%</span></div><div class="accuracy-track" style="width:100%;height:6px"><i style="width:${value}%;background:${color}"></i></div></div>`; }
 
   function leaderboardPage() {
+    const podium = (rank, medal) => leaderboard[rank-1] ? leaderPodium(leaderboard[rank-1], rank, medal) : '';
+    const body = leaderboard.length
+      ? `<div class="three-column" style="margin-bottom:14px">${podium(2,'🥈')}${podium(1,'👑')}${podium(3,'🥉')}</div>
+      <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Full leaderboard</h3><p>${leaderboard.length} student${leaderboard.length===1?'':'s'} · updated just now</p></div><span class="chip published">Live</span></div><div class="rank-list">${leaderboard.map((r,i)=>rankRow(r,i)).join('')}</div></article>`
+      : `<div class="glass-card empty-state">${emptyToy()}<h3>No rankings yet</h3><p>Attempt a published quiz to open the leaderboard — your best score counts.</p><button class="btn btn-primary" data-page="library">${icon('library-big')}Find a quiz</button></div>`;
     return `<section class="page">
-      <div class="page-head"><div><span class="eyebrow">Live rankings</span><h2>Skill speaks louder than luck.</h2><p>Ranked by marks first, then fastest completion time.</p></div><div class="page-actions"><button class="btn btn-secondary">Java Quiz — Batch 5.0 ${icon('chevron-down')}</button></div></div>
-      <div class="three-column" style="margin-bottom:14px">${leaderPodium(leaderboard[1],2,'🥈')}${leaderPodium(leaderboard[0],1,'👑')}${leaderPodium(leaderboard[2],3,'🥉')}</div>
-      <article class="glass-card panel"><div class="panel-head"><div class="panel-title"><h3>Full leaderboard</h3><p>284 students · updated just now</p></div><span class="chip published">Live</span></div><div class="rank-list">${leaderboard.map((r,i)=>rankRow(r,i)).join('')}</div></article>
+      <div class="page-head"><div><span class="eyebrow">Live rankings</span><h2>Skill speaks louder than luck.</h2><p>Ranked by marks first, then fastest completion time.</p></div></div>
+      ${body}
     </section>`;
   }
 
-  function leaderPodium(r,rank,medal) { return `<article class="glass-card panel" style="text-align:center;${rank===1?'border-color:rgba(255,191,98,.23);transform:translateY(-5px)':''}"><div style="font-size:${rank===1?28:22}px;margin-bottom:8px">${medal}</div><span class="mini-avatar" style="width:43px;height:43px;margin:0 auto 9px;--av1:${rank===1?'#ffbf62':'#4d94ff'};--av2:${rank===1?'#a96112':'#164a98'}">${initials(r.name)}</span><strong style="display:block;font-size:11px">${r.name}</strong><span style="display:block;color:var(--muted);font-size:8px;margin-top:4px">${r.marks}/50 · ${r.time}</span></article>`; }
-  function rankRow(r,i) { const medal = ['🥇','🥈','🥉'][i]; return `<div class="rank-item ${r.me?'me':''}"><span class="rank-num ${medal?'medal':''}">${medal || i+1}</span><span class="mini-avatar">${initials(r.name)}</span><span class="rank-copy"><strong>${r.name}${r.me?' · You':''}</strong><span>Batch ${r.batch}</span></span><span class="rank-score"><strong>${r.marks}/50</strong><span>${r.time}</span></span></div>`; }
+  function leaderPodium(r,rank,medal) { return `<article class="glass-card panel podium-card rank-${rank}" style="text-align:center;${rank===1?'border-color:rgba(255,191,98,.23);transform:translateY(-5px)':''}"><div class="podium-medal" style="font-size:${rank===1?28:22}px;margin-bottom:8px">${medal}</div><span class="mini-avatar" style="width:43px;height:43px;margin:0 auto 9px;--av1:${rank===1?'#ffbf62':'#4d94ff'};--av2:${rank===1?'#a96112':'#164a98'}">${initials(r.name)}</span><strong style="display:block;font-size:11px">${escapeHTML(r.name)}</strong><span style="display:block;color:var(--muted);font-size:8px;margin-top:4px">${r.marks} marks · ${r.time}</span></article>`; }
+  function rankRow(r,i) { const medal = ['🥇','🥈','🥉'][i]; return `<div class="rank-item ${r.me?'me':''}" style="--rank-i:${i}"><span class="rank-num ${medal?'medal':''}">${medal || i+1}</span><span class="mini-avatar">${initials(r.name)}</span><span class="rank-copy"><strong>${escapeHTML(r.name)}${r.me?' · You':''}</strong><span>Batch ${escapeHTML(String(r.batch ?? '—'))}</span></span><span class="rank-score"><strong>${r.marks} marks</strong><span>${r.time}</span></span></div>`; }
 
   function bookmarksPage() {
     const questions = sampleQuestions.filter(q=>state.bookmarks.has(q.id));
